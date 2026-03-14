@@ -1,0 +1,219 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #0891b2;
+  --primary-dark: #0e7490;
+  --secondary: #6366f1;
+  --accent: #f43f5e;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  @apply bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50/30 text-slate-700 font-inter overflow-x-hidden;
+  min-height: 100vh;
+  color: #1e293b;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  @apply font-outfit font-bold;
+  color: #1e293b;
+}
+
+p, span, a, li, td, th, label {
+  color: inherit;
+}
+
+/* ========== UTILITY CLASSES ========== */
+.container-custom {
+  @apply max-w-7xl mx-auto px-6 lg:px-8;
+}
+
+.section-padding {
+  @apply py-24 md:py-32;
+}
+
+/* ========== GLASS MORPHISM (Light) ========== */
+.glass-card {
+  @apply bg-white/70 backdrop-blur-xl border border-slate-200/60 rounded-2xl shadow-sm;
+}
+
+.glass-card-hover {
+  @apply bg-white/70 backdrop-blur-xl border border-slate-200/60 rounded-2xl shadow-sm
+         hover:bg-white/90 hover:border-slate-300/60 hover:shadow-md hover:shadow-blue-500/5
+         transition-all duration-500;
+}
+
+/* ========== GRADIENT TEXTS ========== */
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600;
+}
+
+.text-gradient-warm {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-rose-500 via-pink-500 to-purple-600;
+}
+
+.text-gradient-teal {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-teal-500 to-cyan-500;
+}
+
+/* ========== BUTTONS ========== */
+.btn-primary {
+  @apply px-8 py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600
+         hover:from-cyan-400 hover:to-blue-500
+         rounded-xl font-semibold
+         transition-all duration-300
+         shadow-lg shadow-cyan-500/25 hover:shadow-xl hover:shadow-cyan-500/40
+         active:scale-95;
+  color: white !important;
+}
+
+.btn-secondary {
+  @apply px-8 py-3.5 bg-slate-100/80 backdrop-blur-sm
+         hover:bg-slate-200/80 rounded-xl font-semibold
+         transition-all duration-300 border border-slate-200
+         hover:border-slate-300 active:scale-95;
+  color: #334155 !important;
+}
+
+/* ========== SOFT GLOW EFFECTS ========== */
+.glow-cyan {
+  box-shadow:
+    0 0 30px rgba(6, 182, 212, 0.08),
+    0 4px 20px rgba(6, 182, 212, 0.04);
+}
+
+.glow-indigo {
+  box-shadow:
+    0 0 30px rgba(99, 102, 241, 0.08),
+    0 4px 20px rgba(99, 102, 241, 0.04);
+}
+
+.glow-rose {
+  box-shadow:
+    0 0 30px rgba(244, 63, 94, 0.08),
+    0 4px 20px rgba(244, 63, 94, 0.04);
+}
+
+/* ========== ANIMATED GRADIENT BORDER ========== */
+.animated-border {
+  position: relative;
+  overflow: hidden;
+}
+
+.animated-border::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #06b6d4, #6366f1, #f43f5e, #06b6d4);
+  background-size: 400%;
+  z-index: -1;
+  animation: borderGlow 8s linear infinite;
+  border-radius: inherit;
+}
+
+@keyframes borderGlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ========== FLOATING PARTICLES ========== */
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* ========== SCROLLBAR ========== */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #06b6d4, #6366f1);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #22d3ee, #818cf8);
+}
+
+/* ========== MESH GRADIENT BACKGROUND (Light) ========== */
+.mesh-bg {
+  background-color: transparent;
+  background-image:
+    radial-gradient(at 20% 20%, rgba(6, 182, 212, 0.06) 0px, transparent 60%),
+    radial-gradient(at 80% 10%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
+    radial-gradient(at 50% 80%, rgba(244, 63, 94, 0.04) 0px, transparent 60%),
+    radial-gradient(at 90% 90%, rgba(6, 182, 212, 0.03) 0px, transparent 40%);
+}
+
+/* ========== PULSE DOT ========== */
+.pulse-dot {
+  @apply relative;
+}
+
+.pulse-dot::after {
+  content: "";
+  @apply absolute w-2 h-2 bg-emerald-400 rounded-full top-1 right-1;
+  animation: pulse-ring 2s ease-in-out infinite;
+}
+
+@keyframes pulse-ring {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.5); }
+  50% { box-shadow: 0 0 0 8px rgba(52, 211, 153, 0); }
+}
+
+/* ========== STAT CARD COUNTER ========== */
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.stat-animate {
+  animation: countUp 0.6s ease-out forwards;
+}
+
+/* ========== GRID PATTERN (Light) ========== */
+.grid-pattern {
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.02) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* ========== SMOOTH SCROLL ========== */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ========== ICON BADGE BACKGROUNDS ========== */
+.bg-white\/5 { background-color: rgba(241, 245, 249, 0.8) !important; }
+.bg-white\/3 { background-color: rgba(241, 245, 249, 0.6) !important; }
+.bg-white\/10 { background-color: rgba(226, 232, 240, 0.5) !important; }
+
+/* Border overrides for light theme */
+.border-white\/10 { border-color: rgba(203, 213, 225, 0.4) !important; }
+.border-white\/20 { border-color: rgba(203, 213, 225, 0.6) !important; }
+.border-white\/5 { border-color: rgba(226, 232, 240, 0.5) !important; }

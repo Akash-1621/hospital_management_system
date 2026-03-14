@@ -1,0 +1,471 @@
+<html
+  xmlns:o="urn:schemas-microsoft-com:office:office"
+  xmlns:w="urn:schemas-microsoft-com:office:word"
+  xmlns="http://www.w3.org/TR/REC-html40"
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="ProgId" content="Word.Document" />
+    <meta name="Generator" content="Microsoft Word 15" />
+    <!--[if gte mso 9
+      ]><xml>
+        <o:DocumentProperties>
+          <o:Title>CareSphere - Patient Management Module</o:Title>
+        </o:DocumentProperties>
+        <w:WordDocument>
+          <w:View>Print</w:View>
+        </w:WordDocument>
+      </xml><!
+    [endif]-->
+    <style>
+      @page {
+        size: A4;
+        margin: 2.54cm 3.17cm 2.54cm 3.17cm;
+      }
+      body {
+        font-family: "Times New Roman", Times, serif;
+        font-size: 12pt;
+        line-height: 1.5;
+        color: #000;
+        margin: 0;
+        padding: 0;
+      }
+      h1 {
+        font-size: 16pt;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 10pt;
+      }
+      h2 {
+        font-size: 14pt;
+        font-weight: bold;
+        margin-top: 24pt;
+        margin-bottom: 6pt;
+      }
+      h3 {
+        font-size: 12pt;
+        font-weight: bold;
+        margin-top: 18pt;
+        margin-bottom: 6pt;
+      }
+      .center {
+        text-align: center;
+      }
+      .header-block {
+        text-align: center;
+        margin-bottom: 20pt;
+      }
+      .header-block p {
+        margin: 2pt 0;
+      }
+      .separator {
+        border: none;
+        border-top: 1.5px solid #000;
+        margin: 10pt 0;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 12pt 0;
+        font-size: 11pt;
+      }
+      table,
+      th,
+      td {
+        border: 1px solid #000;
+      }
+      th {
+        background-color: #f2f2f2;
+        padding: 8pt 6pt;
+        text-align: left;
+        font-weight: bold;
+      }
+      td {
+        padding: 6pt;
+        vertical-align: top;
+      }
+      .api-method {
+        font-weight: bold;
+        color: #fff;
+        padding: 2pt 8pt;
+        border-radius: 3pt;
+        font-size: 10pt;
+      }
+      .method-post {
+        background-color: #49cc90;
+      }
+      .method-get {
+        background-color: #61affe;
+      }
+      .method-put {
+        background-color: #fca130;
+      }
+      .method-delete {
+        background-color: #f93e3e;
+      }
+      .screenshot-container {
+        text-align: center;
+        margin: 16pt 0;
+        page-break-inside: avoid;
+      }
+      .screenshot-container img {
+        max-width: 100%;
+        border: 1px solid #ddd;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      .screenshot-caption {
+        font-style: italic;
+        font-size: 10pt;
+        color: #555;
+        margin-top: 6pt;
+      }
+      .info-table {
+        width: 100%;
+        border: none;
+        margin: 6pt 0;
+      }
+      .info-table td {
+        border: none;
+        padding: 3pt 6pt;
+      }
+      .info-label {
+        font-weight: bold;
+        width: 200pt;
+      }
+      ul {
+        margin: 6pt 0;
+      }
+      li {
+        margin: 4pt 0;
+      }
+      .page-break {
+        page-break-before: always;
+      }
+      code {
+        font-family: "Courier New", monospace;
+        font-size: 10pt;
+        background: #f4f4f4;
+        padding: 1pt 4pt;
+      }
+      .code-block {
+        font-family: "Courier New", monospace;
+        font-size: 9pt;
+        background: #1e293b;
+        color: #a7f3d0;
+        padding: 12pt;
+        border-radius: 4pt;
+        white-space: pre-wrap;
+        margin: 12pt 0;
+        line-height: 1.4;
+      }
+      .bullet-list li {
+        margin: 4pt 0;
+        line-height: 1.6;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ===== PAGE 1: COVER ===== -->
+    <div class="header-block">
+      <p style="font-size: 14pt; font-weight: bold; margin-bottom: 4pt">
+        23CSE461 — FULLSTACK FRAMEWORKS
+      </p>
+      <p style="font-size: 14pt; font-weight: bold">FORM ASSIGNMENT</p>
+    </div>
+
+    <br />
+
+    <table class="info-table">
+      <tr>
+        <td class="info-label">Name</td>
+        <td>: Akash Prasad M</td>
+      </tr>
+      <tr>
+        <td class="info-label">Register Number</td>
+        <td>: CB.SC.U4CSE23703</td>
+      </tr>
+      <tr>
+        <td class="info-label">Class</td>
+        <td>: CSE-G</td>
+      </tr>
+    </table>
+
+    <hr class="separator" />
+
+    <table class="info-table">
+      <tr>
+        <td class="info-label">Project Name</td>
+        <td>: <b>CareSphere</b></td>
+      </tr>
+      <tr>
+        <td class="info-label">Name of Module</td>
+        <td>: <b>Patient Management</b></td>
+      </tr>
+    </table>
+
+    <hr class="separator" />
+
+    <!-- ===== MODULE DESCRIPTION ===== -->
+    <h2>Module Description</h2>
+
+    <p>
+      The <b>Patient Management</b> module is the core module of the CareSphere
+      Hospital Management System. It provides a complete CRUD (Create, Read,
+      Update, Delete) API for managing patient records in a hospital. Built
+      using the <b>MERN Stack</b> (MongoDB, Express.js, React.js, Node.js), this
+      module handles patient registration, record retrieval, updates, and
+      discharge/deletion workflows.
+    </p>
+
+    <h3>Reports</h3>
+    <p>The module supports data retrieval useful for generating reports:</p>
+    <ul class="bullet-list">
+      <li>
+        <b>Filtering by date range</b> (<code>startDate</code>,
+        <code>endDate</code> query params) — enables weekly/monthly admission
+        summaries
+      </li>
+      <li>
+        <b>Filtering by department</b> (CARDIOLOGY, NEUROLOGY, ORTHOPEDICS,
+        PEDIATRICS, GENERAL) — enables department-wise patient breakdowns
+      </li>
+      <li>
+        <b>Filtering by status</b> (ADMITTED, DISCHARGED, UNDER_TREATMENT,
+        CRITICAL) — enables status-based tracking reports
+      </li>
+      <li>
+        <b>Search by name/email</b> (<code>search</code> query param) — enables
+        quick patient lookup
+      </li>
+      <li>
+        <b>Pagination</b> (<code>page</code>, <code>limit</code>) — supports
+        large dataset reporting with a default of 50 items per page
+      </li>
+    </ul>
+
+    <!-- ===== TECH STACK ===== -->
+    <h3>Technology Stack</h3>
+    <table>
+      <tr>
+        <th>Layer</th>
+        <th>Technology</th>
+      </tr>
+      <tr>
+        <td>Frontend</td>
+        <td>React.js 18, Vite, TailwindCSS, Framer Motion</td>
+      </tr>
+      <tr>
+        <td>Backend</td>
+        <td>Node.js, Express.js 4</td>
+      </tr>
+      <tr>
+        <td>Database</td>
+        <td>MongoDB with Mongoose ODM</td>
+      </tr>
+      <tr>
+        <td>API Testing</td>
+        <td>Built-in API Tester UI (React Component)</td>
+      </tr>
+    </table>
+
+    <!-- ===== SCHEMA ===== -->
+    <h3>Patient Schema</h3>
+    <div class="code-block">
+      { name: String (required), age: Number (required, 0-150), gender: String
+      (enum: MALE, FEMALE, OTHER), contact: String (required), email: String,
+      address: String, department: String (enum: CARDIOLOGY, NEUROLOGY,
+      ORTHOPEDICS, PEDIATRICS, GENERAL), medicalHistory: String, admissionDate:
+      Date (default: Date.now), status: String (enum: ADMITTED, DISCHARGED,
+      UNDER_TREATMENT, CRITICAL), assignedDoctor: String, timestamps: true
+      (createdAt, updatedAt auto-generated) }
+    </div>
+
+    <!-- ===== API TABLE ===== -->
+    <div class="page-break"></div>
+    <h2>API Endpoints</h2>
+
+    <table>
+      <tr>
+        <th style="width: 30pt">#</th>
+        <th style="width: 70pt">Method</th>
+        <th>Endpoint</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td class="center">1</td>
+        <td><span class="api-method method-post">POST</span></td>
+        <td><code>/api/patients</code></td>
+        <td>Create a new patient record</td>
+      </tr>
+      <tr>
+        <td class="center">2</td>
+        <td><span class="api-method method-get">GET</span></td>
+        <td><code>/api/patients</code></td>
+        <td>Get all patients (with filters &amp; pagination)</td>
+      </tr>
+      <tr>
+        <td class="center">3</td>
+        <td><span class="api-method method-get">GET</span></td>
+        <td><code>/api/patients/:id</code></td>
+        <td>Get a single patient by ID</td>
+      </tr>
+      <tr>
+        <td class="center">4</td>
+        <td><span class="api-method method-put">PUT</span></td>
+        <td><code>/api/patients/:id</code></td>
+        <td>Update a patient (partial update supported)</td>
+      </tr>
+      <tr>
+        <td class="center">5</td>
+        <td><span class="api-method method-delete">DELETE</span></td>
+        <td><code>/api/patients/:id</code></td>
+        <td>Delete a single patient by ID</td>
+      </tr>
+    </table>
+
+    <!-- ===== PROJECT STRUCTURE ===== -->
+    <h2>Project Structure</h2>
+    <div class="code-block">
+      mern-hospital-management/ ├── server/ # Backend │ ├── config/ │ │ └──
+      db.js # MongoDB connection │ ├── controllers/ │ │ └── patientController.js
+      # CRUD logic │ ├── models/ │ │ └── Patient.js # Mongoose schema │ ├──
+      routes/ │ │ └── patientRoutes.js # Express routes │ ├── server.js # Entry
+      point (port 5000) │ └── package.json ├── src/ # Frontend (React + Vite) │
+      ├── components/ │ │ ├── ApiTester.jsx # API testing interface │ │ ├──
+      Features.jsx │ │ ├── Footer.jsx │ │ ├── Hero.jsx │ │ ├── Navbar.jsx │ │
+      └── ProblemSolution.jsx │ ├── App.jsx │ ├── main.jsx │ └── index.css ├──
+      index.html ├── package.json ├── vite.config.js └── tailwind.config.js
+    </div>
+
+    <!-- ===== SCREENSHOTS ===== -->
+    <div class="page-break"></div>
+    <h2>Screenshots</h2>
+
+    <h3>1. Create Patient (POST /api/patients)</h3>
+    <p>
+      Creating a new patient record with name, age, gender, contact, department,
+      medical history, and assigned doctor.
+    </p>
+
+    <div class="screenshot-container">
+      <img src="screenshots/create.png" alt="Create Patient - Form" />
+      <p class="screenshot-caption">
+        Figure 1a: POST request form with patient details
+      </p>
+    </div>
+
+    <div class="screenshot-container">
+      <img
+        src="screenshots/create_response.png"
+        alt="Create Patient - Response"
+      />
+      <p class="screenshot-caption">
+        Figure 1b: Successful creation response with generated _id and
+        timestamps
+      </p>
+    </div>
+
+    <!-- ===== GET ALL ===== -->
+    <div class="page-break"></div>
+    <h3>2. Display All Patients (GET /api/patients)</h3>
+    <p>
+      Retrieving all patient records with optional filters for department,
+      status, and pagination support.
+    </p>
+
+    <div class="screenshot-container">
+      <img src="screenshots/get_all.png" alt="Get All Patients" />
+      <p class="screenshot-caption">
+        Figure 2: GET request with filters and paginated response showing
+        patient records
+      </p>
+    </div>
+
+    <!-- ===== UPDATE ===== -->
+    <div class="page-break"></div>
+    <h3>3. Update Patient (PUT /api/patients/:id)</h3>
+    <p>
+      Updating patient status from <code>ADMITTED</code> to
+      <code>UNDER_TREATMENT</code> and changing the assigned doctor. Partial
+      updates are supported.
+    </p>
+
+    <div class="screenshot-container">
+      <img src="screenshots/update.png" alt="Update Patient" />
+      <p class="screenshot-caption">
+        Figure 3: PUT request updating patient status and assigned doctor
+      </p>
+    </div>
+
+    <!-- ===== DELETE ===== -->
+    <div class="page-break"></div>
+    <h3>4. Delete Patient (DELETE /api/patients/:id)</h3>
+    <p>
+      Deleting a patient record by its MongoDB ID. The deleted record data is
+      returned in the response.
+    </p>
+
+    <div class="screenshot-container">
+      <img src="screenshots/delete.png" alt="Delete Patient" />
+      <p class="screenshot-caption">
+        Figure 4: DELETE request with successful deletion response
+      </p>
+    </div>
+
+    <!-- ===== HOW TO RUN ===== -->
+    <div class="page-break"></div>
+    <h2>How to Run</h2>
+
+    <h3>Prerequisites</h3>
+    <ul class="bullet-list">
+      <li>Node.js (v18 or above)</li>
+      <li>MongoDB (running locally on port 27017)</li>
+    </ul>
+
+    <h3>Steps</h3>
+    <table>
+      <tr>
+        <th style="width: 30pt">#</th>
+        <th>Step</th>
+        <th>Command</th>
+      </tr>
+      <tr>
+        <td class="center">1</td>
+        <td>Install frontend dependencies</td>
+        <td><code>npm install</code></td>
+      </tr>
+      <tr>
+        <td class="center">2</td>
+        <td>Install backend dependencies</td>
+        <td><code>cd server && npm install</code></td>
+      </tr>
+      <tr>
+        <td class="center">3</td>
+        <td>Start MongoDB</td>
+        <td><code>mongod</code></td>
+      </tr>
+      <tr>
+        <td class="center">4</td>
+        <td>Start backend server (port 5000)</td>
+        <td><code>cd server && node server.js</code></td>
+      </tr>
+      <tr>
+        <td class="center">5</td>
+        <td>Start frontend dev server (port 5173)</td>
+        <td><code>npm run dev</code></td>
+      </tr>
+      <tr>
+        <td class="center">6</td>
+        <td>Open in browser</td>
+        <td><code>http://localhost:5173</code></td>
+      </tr>
+      <tr>
+        <td class="center">7</td>
+        <td>Access API Tester</td>
+        <td>
+          Click the &ldquo;🧪 API Tester&rdquo; button at the bottom-right
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
