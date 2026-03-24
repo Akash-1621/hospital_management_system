@@ -73,9 +73,13 @@ app.put('/api/auth/profile/:email', async (req, res) => {
     console.log(`Updating profile for: ${email}`);
 
     // 1. Update core User model with any provided fields (case-insensitive)
+    const updateData = { ...req.body };
+    delete updateData._id;
+    delete updateData.__v;
+
     const updatedUser = await User.findOneAndUpdate(
       { email: { $regex: new RegExp(`^${email.trim()}$`, 'i') } },
-      { $set: req.body },
+      { $set: updateData },
       { new: true }
     );
 
