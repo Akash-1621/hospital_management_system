@@ -12,7 +12,7 @@ import PatientPrediction from '../components/PatientPrediction';
 import regression from 'regression';
 import UserProfile from '../components/UserProfile';
 import PatientsSection from '../components/PatientsSection';
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip } from 'recharts';
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 
 const DetailsModal = ({ isOpen, onClose, data, type }) => {
   if (!isOpen || !data) return null;
@@ -486,7 +486,10 @@ export const ReceptionistDashboard = () => {
       try {
         const res = await fetch('http://localhost:5000/api/forecast');
         const data = await res.json();
-        if (data.success) setInventoryData(data.data);
+        if (data.success) {
+          console.log("Inventory Forecast Data:", data.data);
+          setInventoryData(data.data);
+        }
       } catch (err) { console.error(err); }
     };
 
@@ -562,7 +565,7 @@ export const ReceptionistDashboard = () => {
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={inventoryData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                         <defs><linearGradient id="colorFore" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#A855F7" stopOpacity={0.3}/><stop offset="95%" stopColor="#A855F7" stopOpacity={0}/></linearGradient></defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" /><XAxis dataKey="date" axisLine={false} tickLine={false} tick={{fill: '#64748B', fontSize: 11}} /><YAxis axisLine={false} tickLine={false} tick={{fill: '#64748B', fontSize: 11}} /><RechartsTooltip contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" /><XAxis dataKey="date" axisLine={false} tickLine={false} tick={{fill: '#64748B', fontSize: 11}} /><YAxis axisLine={false} tickLine={false} tick={{fill: '#64748B', fontSize: 11}} /><Tooltip contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} />
                         <Area type="monotone" name="Historical" dataKey="historical" stroke="#94A3B8" strokeWidth={3} fillOpacity={0} /><Area type="monotone" name="Projected" dataKey="forecast" stroke="#A855F7" strokeWidth={3} fillOpacity={1} fill="url(#colorFore)" />
                       </AreaChart>
                     </ResponsiveContainer>
