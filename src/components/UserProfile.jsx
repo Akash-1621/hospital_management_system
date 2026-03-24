@@ -55,21 +55,18 @@ const UserProfile = ({ user: initialUser, onBack }) => {
   const handleSave = async (e) => {
     e.preventDefault();
     try {
+      // Use the entire editForm to support all fields (age, gender, specialization, etc.)
       const res = await fetch(`http://localhost:5000/api/auth/profile/${user.email}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: editForm.name,
-          phone: editForm.phone,
-          photo: editForm.photo,
-          specialization: editForm.specialization
-        })
+        body: JSON.stringify(editForm)
       });
 
       const data = await res.json();
       if (data.success) {
-        setUser({ ...editForm });
-        updateUser(editForm);
+        const updatedData = data.data;
+        setUser(updatedData);
+        updateUser(updatedData);
         setIsEditing(false);
         setShowSuccess(true);
         setTimeout(() => setShowSuccess(false), 3000);
@@ -245,13 +242,27 @@ const UserProfile = ({ user: initialUser, onBack }) => {
           <div className="p-8 md:p-12 space-y-2">
             <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-6">Account Details</h3>
             <InfoRow icon={Hash} label="Profile ID" value={randomId} isEditable={false} isEditing={isEditing} editForm={editForm} setEditForm={setEditForm} />
-            <InfoRow icon={BadgeCheck} label="Specialization" value={user?.specialization || 'General Practice'} isEditable={true} field="specialization" isEditing={isEditing} editForm={editForm} setEditForm={setEditForm} />
             <InfoRow icon={Mail} label="Email Address" value={user?.email} isEditable={false} isEditing={isEditing} editForm={editForm} setEditForm={setEditForm} />
-            <InfoRow icon={Phone} label="Contact Phone" value={user?.phone || '+1 (000) 000-0000'} isEditable={true} field="phone" isEditing={isEditing} editForm={editForm} setEditForm={setEditForm} />
-            <InfoRow icon={MapPin} label="Office Location" value="CareSphere Central, Building A" isEditable={false} isEditing={isEditing} editForm={editForm} setEditForm={setEditForm} />
-            <InfoRow icon={Calendar} label="D.O.J" value="12 January 2024" isEditable={false} isEditing={isEditing} editForm={editForm} setEditForm={setEditForm} />
-            <InfoRow icon={Briefcase} label="Position" value="Senior Medical Consultant" isEditable={false} isEditing={isEditing} editForm={editForm} setEditForm={setEditForm} />
-            <InfoRow icon={BadgeCheck} label="Status" value="Verified Account" isEditable={false} isEditing={isEditing} editForm={editForm} setEditForm={setEditForm} />
+            <InfoRow icon={Phone} label="Contact Phone" value={user?.phone || user?.contact} isEditable={true} field="phone" isEditing={isEditing} editForm={editForm} setEditForm={setEditForm} />
+            
+            {user?.role === 'Doctor' && (
+              <>
+                <InfoRow icon={Briefcase} label="Department" value={user?.department} isEditable={true} field="department" isEditing={isEditing} editForm={editForm} setEditForm={setEditForm} />
+                <InfoRow icon={BadgeCheck} label="Specialization" value={user?.specialization} isEditable={true} field="specialization" isEditing={isEditing} editForm={editForm} setEditForm={setEditForm} />
+                <InfoRow icon={Calendar} label="Experience" value={user?.experience} isEditable={true} field="experience" isEditing={isEditing} editForm={editForm} setEditForm={setEditForm} />
+              </>
+            )}
+
+            {user?.role === 'Patient' && (
+              <>
+                <InfoRow icon={User} label="Age" value={user?.age} isEditable={true} field="age" isEditing={isEditing} editForm={editForm} setEditForm={setEditForm} />
+                <InfoRow icon={User} label="Gender" value={user?.gender} isEditable={true} field="gender" isEditing={isEditing} editForm={editForm} setEditForm={setEditForm} />
+                <InfoRow icon={MapPin} label="Address" value={user?.address} isEditable={true} field="address" isEditing={isEditing} editForm={editForm} setEditForm={setEditForm} />
+                <InfoRow icon={Shield} label="Medical History" value={user?.medicalHistory} isEditable={true} field="medicalHistory" isEditing={isEditing} editForm={editForm} setEditForm={setEditForm} />
+              </>
+            )}
+
+            <InfoRow icon={BadgeCheck} label="Status" value={user?.status || 'Verified Account'} isEditable={false} isEditing={isEditing} editForm={editForm} setEditForm={setEditForm} />
           </div>
         </div>
 

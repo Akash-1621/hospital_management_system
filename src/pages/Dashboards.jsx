@@ -1,12 +1,17 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, Clock, User, CheckCircle2, XCircle, AlertTriangle, TrendingUp, Activity, BedDouble, Mail, Hash, Phone, Briefcase, X, LogOut, Home } from 'lucide-react';
+import { 
+  Calendar, Clock, User, CheckCircle2, XCircle, AlertTriangle, TrendingUp, 
+  Activity, BedDouble, Mail, Hash, Phone, Briefcase, X, LogOut, Home, 
+  ShieldCheck, Users, Hospital, CreditCard, Heart, Search, ArrowLeft 
+} from 'lucide-react';
 import AppointmentBooking from '../components/AppointmentBooking';
 import PatientPortal from '../components/PatientPortal';
 import PatientPrediction from '../components/PatientPrediction';
 import regression from 'regression';
 import UserProfile from '../components/UserProfile';
+import PatientsSection from '../components/PatientsSection';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip } from 'recharts';
 
 const DetailsModal = ({ isOpen, onClose, data, type }) => {
@@ -33,8 +38,8 @@ const DetailsModal = ({ isOpen, onClose, data, type }) => {
         
         <div className="flex items-center gap-6 mb-8">
           <div className={`w-20 h-20 rounded-2xl flex items-center justify-center font-black text-2xl text-white shadow-lg overflow-hidden ${type === 'doctor' ? 'bg-slate-900 border-4 border-slate-100' : 'bg-blue-600'}`}>
-             {(data.avatar && (data.avatar.startsWith('http') || data.avatar.startsWith('data:'))) ? (
-               <img src={data.avatar} alt={data.name} className="w-full h-full object-cover" />
+             {((data.avatar || data.photo) && ((data.avatar || data.photo).startsWith('http') || (data.avatar || data.photo).startsWith('data:'))) ? (
+               <img src={data.avatar || data.photo} alt={data.name} className="w-full h-full object-cover" />
              ) : (
                <span>{data.name.charAt(0)}</span>
              )}
@@ -91,8 +96,6 @@ export const DoctorDashboard = () => {
   const [showProfile, setShowProfile] = useState(false);
 
   useEffect(() => {
-    // Fetch all appointments for now (or filter by doctorId if we have it in user object)
-    // Assuming we want to show some appointments
     const fetchAppointments = async () => {
       try {
         const res = await fetch(`http://localhost:5000/api/appointments`);
@@ -100,19 +103,22 @@ export const DoctorDashboard = () => {
         const docRes = await fetch(`http://localhost:5000/api/doctors`);
         const docData = await docRes.json();
         
-        if (data.success) {
-          // If the user object contains the doctor's name, we can filter by name, or if it has the doctor ID
-          // For demonstration, we'll just show the latest 5 appointments
-          setAppointments(data.data.slice(0, 5));
-        }
-
         if (docData.success && docData.data.length > 0) {
-          // Find the doctor document that matches the logged in user's name, or default to the first one for testing
           const myDoc = docData.data.find(d => d.name === user?.name) || docData.data[0];
           if (myDoc) {
             setDoctorProfile(myDoc);
             setIsAvailable(myDoc.isAvailable);
             setUnavailabilityReason(myDoc.unavailabilityReason || '');
+            
+            if (data.success) {
+              const myAppointments = data.data.filter(apt => {
+                const docId = apt.doctorId?._id || apt.doctorId;
+                return docId === myDoc._id || apt.doctorId?.name === myDoc.name;
+              });
+              
+              myAppointments.sort((a, b) => new Date(b.appointmentDate) - new Date(a.appointmentDate));
+              setAppointments(myAppointments);
+            }
           }
         }
       } catch (err) {
@@ -123,6 +129,12 @@ export const DoctorDashboard = () => {
     };
     fetchAppointments();
   }, [user]);
+
+  const todaysCount = appointments.filter(apt => {
+    const aptDate = new Date(apt.appointmentDate).toDateString();
+    const today = new Date().toDateString();
+    return aptDate === today;
+  }).length;
 
   const handleUpdateAvailability = async () => {
     if (!doctorProfile) return;
@@ -154,170 +166,167 @@ export const DoctorDashboard = () => {
   }
 
   if (showProfile) {
-    return <UserProfile user={user} onBack={() => setShowProfile(false)} />;
+    return <UserProfile user={{...user, ...doctorProfile}} onBack={() => setShowProfile(false)} />;
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 p-8 pt-32">
-      <motion.div initial={{opacity:0, y:20}} animate={{opacity:1, y:0}} className="max-w-5xl mx-auto bg-white rounded-3xl p-8 shadow-xl shadow-slate-200/50">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 pb-6 border-b border-slate-100 gap-4">
-           <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent mb-2">Doctor Dashboard</h1>
-              <p className="text-slate-600 text-lg">Welcome back, {user?.name}. You are logged in as a <strong>{user?.role}</strong>.</p>
-           </div>
-           <div className="flex gap-2">
-             <button onClick={() => window.location.href = '/'} className="flex items-center gap-2 px-5 py-2.5 bg-slate-100 border border-slate-200 text-slate-700 font-bold rounded-xl shadow-sm hover:shadow hover:bg-white transition-all shrink-0">
-                <Home size={18} className="text-blue-500" /> Visit Homepage
-             </button>
-             <button onClick={() => setShowProfile(true)} className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl shadow-sm hover:shadow hover:bg-slate-50 transition-all shrink-0">
-                <User size={18} className="text-cyan-500" /> My Profile
-             </button>
-             <button onClick={() => { logout(); window.location.href = '/login'; }} className="flex items-center gap-2 px-5 py-2.5 bg-rose-50 border border-rose-100 text-rose-600 font-bold rounded-xl shadow-sm hover:shadow hover:bg-rose-100 transition-all shrink-0">
-                <LogOut size={18} /> Logout
-             </button>
-           </div>
+    <div className="min-h-screen bg-[#f8fafc] p-4 md:p-8 pt-24 md:pt-32 relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-100/50 rounded-full blur-3xl -mr-48 -mt-48" />
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-100/50 rounded-full blur-3xl -ml-48 -mb-48" />
+
+      <motion.div initial={{opacity:0, y:-20}} animate={{opacity:1, y:0}} className="max-w-6xl mx-auto mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="relative">
+          <div className="flex items-center gap-3 mb-3">
+             <div className="p-2 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl shadow-lg shadow-cyan-500/20">
+                <Activity size={24} className="text-white" />
+             </div>
+             <span className="text-sm font-black tracking-widest text-cyan-600 uppercase">Medical Dashboard</span>
+          </div>
+          <h1 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">
+            Doctor <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-blue-600">Portal</span>
+          </h1>
+          <p className="text-slate-500 text-lg mt-2 font-medium">
+            Welcome back, {user?.name}. Today is <span className="text-slate-900 font-bold">{new Date().toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>.
+          </p>
         </div>
         
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="flex flex-col gap-6">
-              <div className="p-6 rounded-2xl bg-cyan-50 border border-cyan-100 flex flex-col justify-center flex-1">
-                  <h3 className="font-bold text-cyan-800">Today's Appointments</h3>
-                  <p className="text-3xl font-black text-cyan-600 mt-2">{appointments.length || 0}</p>
-              </div>
-              <button 
-                onClick={() => setShowPrediction(true)}
-                className="p-6 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 border border-indigo-400 flex flex-col justify-center flex-1 hover:shadow-lg transition-all hover:-translate-y-1 text-left relative overflow-hidden group"
-              >
-                  <div className="absolute -right-4 -top-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <TrendingUp size={80} color="white" />
-                  </div>
-                  <h3 className="font-bold text-white flex items-center gap-2 relative z-10">
-                    <TrendingUp size={18} /> View Predictions
-                  </h3>
-                  <p className="text-indigo-100 text-sm mt-2 relative z-10">Check expected patient volume for upcoming days</p>
-              </button>
-            </div>
-            <div className="md:col-span-2 p-6 rounded-2xl bg-slate-50 border border-slate-200">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-bold text-slate-800">My Availability</h3>
-                  <div className="flex items-center gap-2">
-                     <span className={`text-sm font-bold ${isAvailable ? 'text-emerald-600' : 'text-slate-500'}`}>
-                       {isAvailable ? 'Available' : 'Unavailable'}
-                     </span>
-                     <button 
-                       onClick={() => {
-                         setIsAvailable(!isAvailable);
-                         setEditingReason(true);
-                       }}
-                       className={`w-12 h-6 rounded-full transition-colors relative ${isAvailable ? 'bg-emerald-500' : 'bg-slate-300'}`}
-                     >
-                        <div className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-all ${isAvailable ? 'left-7' : 'left-1'}`} />
-                     </button>
-                  </div>
+        <div className="flex flex-wrap gap-3">
+          <button onClick={() => window.location.href = '/'} className="group flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 text-slate-700 font-bold rounded-2xl shadow-sm hover:shadow-md hover:border-blue-200 transition-all">
+             <Home size={18} className="text-blue-500 group-hover:scale-110 transition-transform" /> Visit Home
+          </button>
+          <button onClick={() => setShowProfile(true)} className="group flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 text-slate-700 font-bold rounded-2xl shadow-sm hover:shadow-md hover:border-cyan-200 transition-all">
+             <User size={18} className="text-cyan-500 group-hover:scale-110 transition-transform" /> My Profile
+          </button>
+          <button onClick={() => { logout(); window.location.href = '/login'; }} className="group flex items-center gap-2 px-6 py-3 bg-rose-50 border border-rose-100 text-rose-600 font-bold rounded-2xl shadow-sm hover:shadow-md hover:bg-rose-100 transition-all">
+             <LogOut size={18} className="group-hover:translate-x-1 transition-transform" /> Logout
+          </button>
+        </div>
+      </motion.div>
+
+      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="lg:col-span-4 flex flex-col gap-6">
+          <div className="relative group overflow-hidden">
+             <div className="absolute inset-0 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-[2rem] shadow-xl shadow-cyan-500/20 group-hover:scale-[1.02] transition-transform duration-500" />
+             <div className="relative p-8 text-white">
+                <div className="flex justify-between items-start mb-6">
+                   <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center">
+                      <Calendar size={24} />
+                   </div>
+                   <div className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-bold uppercase tracking-wider">Today</div>
                 </div>
-                
+                <h3 className="text-white/80 font-bold text-lg mb-1">Total Appointments</h3>
+                <div className="flex items-baseline gap-2">
+                   <span className="text-6xl font-black">{todaysCount}</span>
+                   <span className="text-cyan-100 font-medium">scheduled</span>
+                </div>
+                <div className="mt-8 pt-6 border-t border-white/10 flex items-center justify-between">
+                   <div className="text-sm font-medium text-cyan-100 flex items-center gap-2">
+                      <CheckCircle2 size={16} /> All requests received
+                   </div>
+                </div>
+             </div>
+          </div>
+
+          <button onClick={() => setShowPrediction(true)} className="relative group p-8 rounded-[2rem] bg-indigo-900 border border-indigo-700/50 shadow-xl shadow-indigo-500/10 overflow-hidden text-left hover:-translate-y-1 transition-all">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl -tr-16 -mt-16" />
+            <div className="relative z-10">
+               <div className="w-12 h-12 rounded-2xl bg-indigo-500/30 flex items-center justify-center text-indigo-300 mb-6">
+                  <TrendingUp size={24} />
+               </div>
+               <h3 className="text-white font-black text-xl mb-2">Patient Traffic Prediction</h3>
+               <p className="text-indigo-200 text-sm leading-relaxed mb-4">View upcoming patient volume trends and optimize your schedule.</p>
+               <div className="flex items-center gap-2 text-indigo-400 font-bold text-sm group-hover:gap-4 transition-all uppercase tracking-widest">
+                  View Analytics <ArrowLeft size={16} className="rotate-180" />
+               </div>
+            </div>
+          </button>
+
+          <div className="p-8 rounded-[2rem] bg-white border border-slate-200 shadow-xl shadow-slate-200/50">
+             <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3">
+                   <div className={`w-3 h-3 rounded-full animate-pulse ${isAvailable ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                   <h3 className="font-black text-slate-800 tracking-tight">MY AVAILABILITY</h3>
+                </div>
+                <button onClick={() => { setIsAvailable(!isAvailable); setEditingReason(true); }} className={`w-14 h-7 rounded-full transition-all relative ${isAvailable ? 'bg-emerald-500 shadow-lg shadow-emerald-500/20' : 'bg-slate-200'}`}>
+                   <div className={`w-5 h-5 rounded-full bg-white absolute top-1 transition-all ${isAvailable ? 'left-8' : 'left-1'} shadow-sm`} />
+                </button>
+             </div>
+             <div className="space-y-4">
+                <div className={`p-4 rounded-2xl border transition-all ${isAvailable ? 'bg-emerald-50 border-emerald-100' : 'bg-slate-50 border-slate-100'}`}>
+                   <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Current Status</p>
+                   <p className={`text-lg font-black ${isAvailable ? 'text-emerald-700' : 'text-slate-500'}`}>{isAvailable ? 'ACTIVE ON DUTY' : 'OUT OF OFFICE'}</p>
+                </div>
                 <AnimatePresence>
                   {!isAvailable && editingReason && (
-                    <motion.div initial={{opacity:0, height:0}} animate={{opacity:1, height:'auto'}} exit={{opacity:0, height:0}}>
-                      <label className="block text-sm font-semibold text-slate-700 mb-2 mt-4">Reason for Unavailability</label>
-                      <input 
-                        type="text" 
-                        value={unavailabilityReason} 
-                        onChange={(e) => setUnavailabilityReason(e.target.value)}
-                        placeholder="e.g. On Leave, In Surgery, Not feeling well"
-                        className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
-                      />
+                    <motion.div initial={{opacity:0, height:0}} animate={{opacity:1, height:'auto'}} className="space-y-4">
+                      <input type="text" value={unavailabilityReason} onChange={(e) => setUnavailabilityReason(e.target.value)} placeholder="e.g. In Surgery, On Leave" className="w-full px-5 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-cyan-500 focus:bg-white transition-all font-medium" />
                     </motion.div>
                   )}
                 </AnimatePresence>
-
                 {!isAvailable && !editingReason && (
-                   <div className="mt-4 p-4 bg-rose-50 border border-rose-100 rounded-xl flex items-center justify-between">
-                     <div>
-                       <p className="text-xs text-rose-500 font-bold uppercase">Current Reason</p>
-                       <p className="text-slate-700 font-medium">{doctorProfile?.unavailabilityReason}</p>
-                     </div>
-                     <button onClick={() => setEditingReason(true)} className="text-sm font-bold text-rose-600 hover:text-rose-800 underline">Edit</button>
+                   <div className="p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-center justify-between">
+                     <p className="text-slate-700 font-bold truncate pr-4">{doctorProfile?.unavailabilityReason || 'No reason specified'}</p>
+                     <button onClick={() => setEditingReason(true)} className="text-xs font-black text-rose-600 uppercase tracking-widest hover:text-rose-800">Edit</button>
                    </div>
                 )}
-
                 {(isAvailable || editingReason) && (
-                  <div className="mt-4 flex justify-end items-center gap-4">
-                    {showSuccess && <span className="text-emerald-600 font-bold text-sm animate-pulse">Saved Successfully!</span>}
-                    <button 
-                      onClick={handleUpdateAvailability}
-                      disabled={updatingAvailability || (!isAvailable && !unavailabilityReason.trim())}
-                      className="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-semibold hover:bg-slate-700 transition-colors disabled:opacity-50"
-                    >
-                      {updatingAvailability ? 'Saving...' : 'Save Status'}
-                    </button>
-                  </div>
+                   <div className="pt-2">
+                     <button onClick={handleUpdateAvailability} disabled={updatingAvailability || (!isAvailable && !unavailabilityReason.trim())} className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-slate-800 shadow-xl shadow-slate-900/10 transition-all disabled:opacity-50">
+                       {updatingAvailability ? 'SYNCHRONIZING...' : 'SAVE CHANGES'}
+                     </button>
+                     {showSuccess && <p className="text-center text-emerald-600 font-bold text-xs mt-3 animate-bounce">Settings Updated Successfully!</p>}
+                   </div>
                 )}
-                {doctorProfile && doctorProfile.isAvailable !== isAvailable && !updatingAvailability && (
-                  <p className="text-xs text-amber-600 mt-2 text-right">You have unsaved changes</p>
-                )}
-            </div>
+             </div>
+          </div>
         </div>
 
-        <div className="mt-10">
-          <h2 className="text-xl font-bold text-slate-800 mb-6">Recent Assigned Patients & Appointments</h2>
-          {loading ? (
-            <p className="text-slate-500 animate-pulse">Loading appointments...</p>
-          ) : appointments.length > 0 ? (
-            <div className="overflow-hidden rounded-2xl border border-slate-200 shadow-sm">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 text-sm">
-                    <th className="p-4 font-semibold">Patient Name</th>
-                    <th className="p-4 font-semibold">Date & Time</th>
-                    <th className="p-4 font-semibold">Reason</th>
-                    <th className="p-4 font-semibold">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {appointments.map(apt => (
-                    <tr key={apt._id} className="hover:bg-slate-50 transition-colors">
-                      <td className="p-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center text-cyan-700 font-bold">
-                            {apt.patientName.charAt(0)}
-                          </div>
-                          <div>
-                            <p className="font-bold text-slate-800">{apt.patientName}</p>
-                            <p className="text-xs text-slate-500">{apt.patientContact}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <p className="text-sm text-slate-700 flex items-center gap-1"><Calendar size={14} className="text-slate-400"/> {new Date(apt.appointmentDate).toLocaleDateString()}</p>
-                        <p className="text-xs text-slate-500 mt-1 flex items-center gap-1"><Clock size={14} className="text-slate-400"/> {apt.timeSlot}</p>
-                      </td>
-                      <td className="p-4">
-                        <p className="text-sm text-slate-600 truncate max-w-[200px]">{apt.reason || 'N/A'}</p>
-                      </td>
-                      <td className="p-4">
-                        <span className={`px-3 py-1 text-xs font-bold rounded-full flex items-center gap-1 w-max ${
-                          apt.status === 'SCHEDULED' ? 'bg-blue-100 text-blue-700' :
-                          apt.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-700' :
-                          'bg-slate-100 text-slate-600'
-                        }`}>
-                          {apt.status === 'SCHEDULED' && <Clock size={12} />}
-                          {apt.status === 'COMPLETED' && <CheckCircle2 size={12} />}
-                          {apt.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="p-8 text-center bg-slate-50 rounded-2xl border border-slate-200">
-              <p className="text-slate-500">No appointments found.</p>
-            </div>
-          )}
+        <div className="lg:col-span-8 flex flex-col gap-6">
+          <div className="p-8 bg-white rounded-[2rem] border border-slate-200 shadow-xl shadow-slate-200/50">
+             <div className="flex items-center justify-between mb-8 text-slate-900 font-black">
+                <h2 className="text-2xl tracking-tight">Recent Appointments</h2>
+                <div className="p-2 bg-slate-100 rounded-xl"><Users size={20} className="text-slate-400" /></div>
+             </div>
+             {loading ? (
+                <div className="py-20 flex flex-col items-center justify-center">
+                   <div className="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mb-4" />
+                   <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Accessing Medical Records...</p>
+                </div>
+             ) : appointments.length > 0 ? (
+                <div className="overflow-x-auto">
+                   <table className="w-full border-separate border-spacing-y-4">
+                      <thead>
+                         <tr className="text-left text-xs font-black text-slate-400 uppercase tracking-[0.2em]">
+                            <th className="pb-2 px-4">PATIENT</th><th className="pb-2 px-4">SCHEDULE</th><th className="pb-2 px-4">REASON</th><th className="pb-2 px-4">STATUS</th>
+                         </tr>
+                      </thead>
+                      <tbody>
+                         {appointments.map(apt => (
+                            <tr key={apt._id} className="group transition-all hover:-translate-y-1">
+                               <td className="bg-slate-50/50 group-hover:bg-cyan-50 border-y border-l border-slate-100 group-hover:border-cyan-100 p-4 rounded-l-2xl transition-colors">
+                                  <div className="flex items-center gap-4">
+                                     <div className="w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center text-cyan-600 font-black text-lg border border-slate-100">{apt.patientName.charAt(0)}</div>
+                                     <div><p className="font-black text-slate-800">{apt.patientName}</p><p className="text-xs text-slate-500 font-bold">{apt.patientContact}</p></div>
+                                  </div>
+                               </td>
+                               <td className="bg-slate-50/50 border-y p-4"><span className="text-sm font-black text-slate-700">{new Date(apt.appointmentDate).toDateString()}</span><br/><span className="text-[10px] uppercase font-black text-cyan-500">{apt.timeSlot}</span></td>
+                               <td className="bg-slate-50/50 border-y p-4 text-sm font-bold text-slate-600 italic">"{apt.reason}"</td>
+                               <td className="bg-slate-50/50 border-y border-r p-4 rounded-r-2xl"><div className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${apt.status === 'SCHEDULED' ? 'bg-blue-600 text-white' : 'bg-emerald-500 text-white'}`}>{apt.status}</div></td>
+                            </tr>
+                         ))}
+                      </tbody>
+                   </table>
+                </div>
+             ) : (
+                <div className="py-20 text-center bg-slate-50 rounded-[2rem] border border-dashed border-slate-300"><h3 className="font-bold text-slate-500">No Appointments Found</h3></div>
+             )}
+          </div>
+          <div className="p-8 bg-white rounded-[2rem] border border-slate-200 shadow-xl shadow-slate-200/50">
+             <h2 className="text-2xl font-black text-slate-800 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-rose-600 mb-8">Patient Directory</h2>
+             <PatientsSection />
+          </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };
@@ -330,111 +339,90 @@ export const PatientDashboard = () => {
     const [doctors, setDoctors] = useState([]);
     const [selectedDoctor, setSelectedDoctor] = useState(null);
     const [showProfile, setShowProfile] = useState(false);
+    const [patientProfile, setPatientProfile] = useState(null);
 
     useEffect(() => {
-        // Fetch all doctors so patient can see them
-        const fetchDoctors = async () => {
+        const fetchData = async () => {
             try {
                 const res = await fetch(`http://localhost:5000/api/doctors`);
                 const data = await res.json();
-                if (data.success) {
-                    setDoctors(data.data);
+                if (data.success) setDoctors(data.data);
+                const resPat = await fetch(`http://localhost:5000/api/patients`);
+                const dataPat = await resPat.json();
+                if (dataPat.success) {
+                  const myPat = dataPat.data.find(p => p.email === user?.email);
+                  if (myPat) setPatientProfile(myPat);
                 }
-            } catch (err) {
-                console.error("Failed to fetch doctors", err);
-            }
+            } catch (err) { console.error(err); }
         };
-        fetchDoctors();
-    }, []);
+        fetchData();
+    }, [user]);
 
-    if (showAppointmentBooking) {
-      return <AppointmentBooking onBack={() => setShowAppointmentBooking(false)} />;
-    }
-
-    if (showPatientPortal) {
-      return <PatientPortal onBack={() => setShowPatientPortal(false)} />;
-    }
-
-    if (showPrediction) {
-      return <PatientPrediction onBack={() => setShowPrediction(false)} />;
-    }
-
-    if (showProfile) {
-      return <UserProfile user={user} onBack={() => setShowProfile(false)} />;
-    }
+    if (showAppointmentBooking) return <AppointmentBooking onBack={() => setShowAppointmentBooking(false)} />;
+    if (showPatientPortal) return <PatientPortal onBack={() => setShowPatientPortal(false)} />;
+    if (showPrediction) return <PatientPrediction onBack={() => setShowPrediction(false)} />;
+    if (showProfile) return <UserProfile user={{...user, ...patientProfile}} onBack={() => setShowProfile(false)} />;
 
     return (
-      <div className="min-h-screen bg-slate-50 p-8 pt-32 relative">
+      <div className="min-h-screen bg-[#f8fafc] p-4 md:p-8 pt-24 md:pt-32 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-100/40 rounded-full blur-3xl -mr-48 -mt-48" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-teal-100/40 rounded-full blur-3xl -ml-48 -mb-48" />
         <DetailsModal isOpen={!!selectedDoctor} onClose={() => setSelectedDoctor(null)} data={selectedDoctor} type="doctor" />
         
-        <motion.div initial={{opacity:0, y:20}} animate={{opacity:1, y:0}} className="max-w-5xl mx-auto bg-white rounded-3xl p-8 shadow-xl shadow-slate-200/50">
-          <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 pb-6 border-b border-slate-100 gap-4">
-            <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-2">Patient Portal</h1>
-              <p className="text-slate-600 text-lg">Welcome, {user?.name}. You are logged in as a <strong>{user?.role}</strong>.</p>
+        <motion.div initial={{opacity:0, y:-20}} animate={{opacity:1, y:0}} className="max-w-6xl mx-auto mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div>
+            <div className="flex items-center gap-3 mb-3">
+               <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl shadow-lg shadow-emerald-500/20"><Heart size={24} className="text-white" /></div>
+               <span className="text-sm font-black tracking-widest text-emerald-600 uppercase">Health Portal</span>
             </div>
-           <div className="flex gap-2">
-             <button onClick={() => window.location.href = '/'} className="flex items-center gap-2 px-5 py-2.5 bg-slate-100 border border-slate-200 text-slate-700 font-bold rounded-xl shadow-sm hover:shadow hover:bg-white transition-all shrink-0">
-               <Home size={18} className="text-teal-500" /> Visit Homepage
-             </button>
-             <button onClick={() => setShowProfile(true)} className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl shadow-sm hover:shadow hover:bg-slate-50 transition-all shrink-0">
-               <User size={18} className="text-emerald-500" /> My Profile
-             </button>
-             <button onClick={() => { logout(); window.location.href = '/login'; }} className="flex items-center gap-2 px-5 py-2.5 bg-rose-50 border border-rose-100 text-rose-600 font-bold rounded-xl shadow-sm hover:shadow hover:bg-rose-100 transition-all shrink-0">
-                <LogOut size={18} /> Logout
-             </button>
-           </div>
+            <h1 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">Patient <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">Dashboard</span></h1>
+            <p className="text-slate-500 text-lg mt-2 font-medium">Welcome back, {user?.name}. Your wellness journey continues <span className="text-emerald-600 font-bold">today</span>.</p>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <button onClick={() => setShowAppointmentBooking(true)} className="p-6 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all text-left border border-cyan-400">
-                  <h3 className="font-bold text-xl">📋 Book Appointment</h3>
-                  <p className="mt-2 text-cyan-100">Schedule a visit with our specialists and choose a convenient timing.</p>
-              </button>
-              <button onClick={() => setShowPatientPortal(true)} className="p-6 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all text-left border border-emerald-400">
-                  <h3 className="font-bold text-xl">🏥 Hospital Portal</h3>
-                  <p className="mt-2 text-emerald-100">View real-time bed availability, see doctor schedules, and request admission online.</p>
-              </button>
-              <button 
-                onClick={() => setShowPrediction(true)}
-                className="p-6 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 text-white shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all text-left border border-purple-400 col-span-1 md:col-span-2 flex items-center justify-between"
-              >
-                  <div>
-                    <h3 className="font-bold text-xl flex items-center gap-2"><TrendingUp size={20} /> Traffic Predictor</h3>
-                    <p className="mt-2 text-purple-100">See expected patient volume trends before visiting the hospital.</p>
-                  </div>
-                  <TrendingUp size={48} className="opacity-20 hidden sm:block" />
-              </button>
-              <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 col-span-1 md:col-span-2 mt-2">
-                  <h3 className="font-bold text-slate-800">Our Doctors Directory</h3>
-                  <p className="text-slate-600 mt-2 mb-4 text-sm">Click on any doctor to view their details, department, and availability.</p>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                     {doctors.length > 0 ? doctors.map(doc => (
-                        <div key={doc._id} onClick={() => setSelectedDoctor(doc)} className="bg-white border border-slate-200 hover:border-emerald-400 p-4 rounded-xl cursor-pointer shadow-sm hover:shadow-md transition-all flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center font-bold text-emerald-700 overflow-hidden">
-                                {(doc.avatar && (doc.avatar.startsWith('http') || doc.avatar.startsWith('data:'))) ? (
-                                    <img src={doc.avatar} alt={doc.name} className="w-full h-full object-cover" />
-                                ) : (
-                                    <span>{doc.avatar || doc.name.charAt(0)}</span>
-                                )}
-                            </div>
-                            <div>
-                                <h4 className="font-bold text-slate-800 text-sm">{doc.name}</h4>
-                                <p className="text-xs text-slate-500">{doc.department}</p>
-                            </div>
-                        </div>
-                     )) : (
-                        <p className="text-slate-500 text-sm">Loading doctors...</p>
-                     )}
-                  </div>
-              </div>
+          <div className="flex flex-wrap gap-3">
+            <button onClick={() => window.location.href = '/'} className="px-6 py-3 bg-white border rounded-2xl font-bold flex items-center gap-2 shadow-sm hover:shadow-md transition-all"><Home size={18} className="text-emerald-500" /> Visit Home</button>
+            <button onClick={() => setShowProfile(true)} className="px-6 py-3 bg-white border rounded-2xl font-bold flex items-center gap-2 shadow-sm hover:shadow-md transition-all"><User size={18} className="text-teal-500" /> My Profile</button>
+            <button onClick={() => { logout(); window.location.href = '/login'; }} className="px-6 py-3 bg-rose-50 border border-rose-100 text-rose-600 font-bold rounded-2xl shadow-sm hover:shadow-md transition-all flex items-center gap-2"><LogOut size={18} /> Logout</button>
           </div>
         </motion.div>
+
+        <div className="max-w-6xl mx-auto space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                { label: 'Book Appointment', desc: 'Schedule a visit with our specialists.', icon: Calendar, color: 'from-cyan-600 to-blue-700', action: () => setShowAppointmentBooking(true) },
+                { label: 'Hospital Portal', desc: 'View real-time bed & admission status.', icon: Hospital, color: 'from-emerald-600 to-teal-700', action: () => setShowPatientPortal(true) },
+                { label: 'Traffic Predictor', desc: 'Plan your visit around peak trends.', icon: TrendingUp, color: 'bg-[#1e293b]', action: () => setShowPrediction(true), text: 'text-indigo-400' }
+              ].map((item, i) => (
+                <button key={i} onClick={item.action} className={`group relative p-8 rounded-[2rem] bg-gradient-to-br ${item.color} overflow-hidden text-left shadow-xl hover:-translate-y-1 transition-all ${item.color === 'bg-[#1e293b]' ? 'border border-slate-700' : ''}`}>
+                    <div className="relative z-10 text-white">
+                      <div className={`w-14 h-14 rounded-2xl ${item.color === 'bg-[#1e293b]' ? 'bg-indigo-500/20 ' + item.text : 'bg-white/20'} flex items-center justify-center mb-6`}><item.icon size={28} /></div>
+                      <h3 className="font-black text-2xl mb-2">{item.label}</h3>
+                      <p className={`text-sm mb-6 ${item.color.includes('emerald') ? 'text-emerald-100' : item.color.includes('cyan') ? 'text-cyan-100' : 'text-slate-400'}`}>{item.desc}</p>
+                      <div className={`flex items-center gap-2 font-black text-xs uppercase tracking-widest group-hover:gap-4 transition-all ${item.text || ''}`}>Open <ArrowLeft size={16} className="rotate-180" /></div>
+                    </div>
+                </button>
+              ))}
+          </div>
+
+          <div className="p-8 bg-white rounded-[2.5rem] border border-slate-200 shadow-xl shadow-slate-200/50">
+              <div className="flex items-center gap-3 mb-8"><div className="p-2 bg-emerald-50 rounded-xl"><Search size={22} className="text-emerald-600" /></div><h2 className="text-2xl font-black text-slate-800 tracking-tight">Specialists Directory</h2></div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                 {doctors.map(doc => (
+                    <div key={doc._id} onClick={() => setSelectedDoctor(doc)} className="group bg-slate-50 border border-slate-100 hover:border-emerald-200 p-6 rounded-3xl cursor-pointer transition-all flex flex-col items-center text-center">
+                        <div className="w-20 h-20 rounded-2xl bg-white shadow-sm flex items-center justify-center overflow-hidden mb-4">
+                           {(doc.avatar && doc.avatar.startsWith('http')) ? <img src={doc.avatar} className="w-full h-full object-cover" /> : <span className="text-3xl font-black text-emerald-600">{doc.name.charAt(0)}</span>}
+                        </div>
+                        <h4 className="font-black text-slate-900 group-hover:text-emerald-900">{doc.name}</h4>
+                        <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-1 mb-3">{doc.department}</p>
+                        <div className="px-3 py-1 bg-white border rounded-full text-[10px] font-black uppercase text-slate-600 tracking-widest">{doc.specialization || 'Consultant'}</div>
+                    </div>
+                 ))}
+              </div>
+          </div>
+        </div>
       </div>
     );
   };
-  
+
 export const ReceptionistDashboard = () => {
     const { user, logout } = useContext(AuthContext);
     const [appointments, setAppointments] = useState([]);
@@ -442,424 +430,176 @@ export const ReceptionistDashboard = () => {
     const [loading, setLoading] = useState(true);
     const [showPrediction, setShowPrediction] = useState(false);
     const [inventoryData, setInventoryData] = useState([]);
-    const [selectedEntity, setSelectedEntity] = useState(null); // {data, type}
+    const [selectedEntity, setSelectedEntity] = useState(null);
     const [patientsMap, setPatientsMap] = useState({});
     const [showProfile, setShowProfile] = useState(false);
+    const [stats, setStats] = useState({ newRegistrations: '...', bedOccupancy: '...', pendingBills: '...' });
 
     useEffect(() => {
       const fetchData = async () => {
         try {
-          const [resApt, resDoc] = await Promise.all([
+          const [resApt, resDoc, resStats, resPat] = await Promise.all([
             fetch(`http://localhost:5000/api/appointments`),
-            fetch(`http://localhost:5000/api/doctors`) // Now it returns all doctors because of our backend change
+            fetch(`http://localhost:5000/api/doctors`),
+            fetch(`http://localhost:5000/api/stats`),
+            fetch(`http://localhost:5000/api/patients`)
           ]);
           const dataApt = await resApt.json();
           const dataDoc = await resDoc.json();
+          const dataStats = await resStats.json();
+          const dataPat = await resPat.json();
           
-          if (dataApt.success) {
-            // Apply mock No-Show prediction risk to appointments
-            const aptsWithRisk = dataApt.data.slice(0, 5).map(apt => ({
-              ...apt,
-              noShowRisk: calculateNoShowRisk(apt)
-            }));
-            setAppointments(aptsWithRisk); 
-          }
-          if (dataDoc.success) {
-            setDoctors(dataDoc.data);
-          }
-          
-          // Fetch patients so we have details for the modal
-          const resPat = await fetch(`http://localhost:5000/api/patients`);
-          const patData = await resPat.json();
-          if (patData.success) {
+          if (dataStats.success) setStats(dataStats.data);
+          if (dataDoc.success) setDoctors(dataDoc.data);
+          if (dataPat.success) {
              const pMap = {};
-             patData.data.forEach(p => pMap[p._id] = p);
+             dataPat.data.forEach(p => pMap[p._id] = p);
              setPatientsMap(pMap);
           }
-
+          if (dataApt.success) {
+            setAppointments(dataApt.data.slice(0, 5).map(apt => ({ ...apt, noShowRisk: calculateNoShowRisk(apt) }))); 
+          }
           generateInventoryForecast();
-        } catch (err) {
-          console.error("Failed to fetch data", err);
-        } finally {
-          setLoading(false);
-        }
+        } catch (err) { console.error(err); } finally { setLoading(false); }
       };
       fetchData();
     }, []);
 
-    // 1. Appointment No-Show Predictor (Classification Heuristic)
     const calculateNoShowRisk = (apt) => {
-      let riskScore = 0;
-      const today = new Date();
-      const aptDate = new Date(apt.appointmentDate);
-      const leadTimeDays = Math.floor((aptDate - today) / (1000 * 60 * 60 * 24));
-      
-      // Feature: Lead Time (longer lead time = higher no show risk)
-      if (leadTimeDays > 14) riskScore += 3;
-      else if (leadTimeDays > 7) riskScore += 2;
-      else if (leadTimeDays > 3) riskScore += 1;
-
-      // Feature: Follow-up or General (General reasons often have higher drop off)
-      if (!apt.reason || apt.reason.toLowerCase().includes('consultation')) riskScore += 1;
-      
-      // Feature: Department
-      if (apt.department === 'General Medicine' || apt.department === 'Dermatology') riskScore += 1;
-
-      if (riskScore >= 4) return 'High';
-      if (riskScore >= 2) return 'Medium';
-      return 'Low';
+      let risk = 0;
+      const lead = Math.floor((new Date(apt.appointmentDate) - new Date()) / (1000*60*60*24));
+      if (lead > 14) risk += 3; else if (lead > 7) risk += 2;
+      return risk >= 3 ? 'High' : risk >= 1 ? 'Medium' : 'Low';
     };
 
-    // 2. Length of Stay (LoS) Estimator
-    const mockAdmittedPatients = [
-      { id: 1, name: 'Robert Chen', age: 65, condition: 'Pneumonia (Severe)', admittedDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) },
-      { id: 2, name: 'Sarah Miller', age: 28, condition: 'Appendectomy', admittedDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000) },
-      { id: 3, name: 'James Wilson', age: 45, condition: 'Cardiac Observation', admittedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) },
-      { id: 4, name: 'Maria Garcia', age: 52, condition: 'Knee Replacement', admittedDate: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000) },
-    ];
+    const admittedPatients = Object.values(patientsMap).slice(0, 4).map(p => ({
+      id: p._id, name: p.name, age: p.age || 45, condition: p.medicalHistory || 'Observation', admittedDate: new Date(Date.now() - 3*24*60*60*1000)
+    }));
 
     const calculateLoSPrediction = (patient) => {
-       // Mock Regression logic based on condition severity and age
-       let baseStay = 3; // base 3 days
-       if (patient.condition.includes('Severe') || patient.condition.includes('Cardiac')) baseStay += 4;
-       if (patient.condition.includes('Replacement')) baseStay += 5;
-       
-       if (patient.age > 60) baseStay += 2;
-       else if (patient.age > 40) baseStay += 1;
-
-       const dischargeDate = new Date(patient.admittedDate);
-       dischargeDate.setDate(dischargeDate.getDate() + baseStay);
-       
-       const today = new Date();
-       const daysRemaining = Math.max(0, Math.ceil((dischargeDate - today) / (1000 * 60 * 60 * 24)));
-       const totalStay = baseStay;
-       const daysSpent = Math.max(0, Math.ceil((today - patient.admittedDate) / (1000 * 60 * 60 * 24)));
-       const progressPercent = Math.min(100, (daysSpent / totalStay) * 100);
-
-       return { predictedStay: totalStay, daysRemaining, progressPercent, dischargeDate };
+       const base = patient.age > 60 ? 7 : 4;
+       const progress = 65;
+       return { predictedStay: base, daysRemaining: Math.ceil(base * (1 - progress/100)), progressPercent: progress };
     };
 
-    // 4. Pharmacy & Inventory Demand Forecasting (Time-Series ML)
-    const generateInventoryForecast = () => {
-      // Mock historical data: last 14 days of Saline IV & Mask usage
-      const today = new Date();
-      const historicalDemand = [120, 115, 125, 130, 140, 135, 150, 145, 160, 155, 165, 175, 170, 185]; 
-      
-      const regressionData = historicalDemand.map((vol, index) => [index, vol]);
-      const result = regression.polynomial(regressionData, { order: 2 }); // Non-linear demand curve
-      
-      const newChartData = [];
-
-      // Add historical data
-      for (let i = 0; i < historicalDemand.length; i++) {
-        const d = new Date(today);
-        d.setDate(d.getDate() - (historicalDemand.length - i - 1));
-        newChartData.push({
-          date: d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
-          historical: historicalDemand[i],
-          forecast: null
-        });
-      }
-
-      // Add forecasted data for next 7 days
-      for (let i = 0; i < 7; i++) {
-        const d = new Date(today);
-        d.setDate(d.getDate() + i + 1);
-        const forecastValue = Math.round(result.predict(historicalDemand.length + i)[1]);
-
-        newChartData.push({
-          date: d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
-          historical: null,
-          forecast: forecastValue
-        });
-      }
-
-      setInventoryData(newChartData);
+    const generateInventoryForecast = async () => {
+      try {
+        const res = await fetch('http://localhost:5000/api/forecast');
+        const data = await res.json();
+        if (data.success) setInventoryData(data.data);
+      } catch (err) { console.error(err); }
     };
 
-    if (showPrediction) {
-      return <PatientPrediction onBack={() => setShowPrediction(false)} />;
-    }
-
-    if (showProfile) {
-      return <UserProfile user={user} onBack={() => setShowProfile(false)} />;
-    }
+    if (showPrediction) return <PatientPrediction onBack={() => setShowPrediction(false)} />;
+    if (showProfile) return <UserProfile user={user} onBack={() => setShowProfile(false)} />;
 
     return (
-      <div className="min-h-screen bg-slate-50 p-8 pt-32 relative">
-        <DetailsModal 
-           isOpen={!!selectedEntity} 
-           onClose={() => setSelectedEntity(null)} 
-           data={selectedEntity?.data} 
-           type={selectedEntity?.type} 
-        />
+      <div className="min-h-screen bg-[#f8fafc] p-4 md:p-8 pt-24 md:pt-32 relative overflow-hidden text-slate-900">
+        <DetailsModal isOpen={!!selectedEntity} onClose={() => setSelectedEntity(null)} data={selectedEntity?.data} type={selectedEntity?.type} />
         
-        <motion.div initial={{opacity:0, y:20}} animate={{opacity:1, y:0}} className="max-w-6xl mx-auto bg-white rounded-3xl p-8 shadow-xl shadow-slate-200/50">
-          <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 pb-6 border-b border-slate-100 gap-4">
-            <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">Reception Desk</h1>
-              <p className="text-slate-600 text-lg">Hello, {user?.name}. You are logged in as a <strong>{user?.role}</strong>.</p>
+        <motion.div initial={{opacity:0, y:-20}} animate={{opacity:1, y:0}} className="max-w-7xl mx-auto mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6 relative z-10">
+          <div>
+            <div className="flex items-center gap-3 mb-3">
+               <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl shadow-lg shadow-purple-500/20"><ShieldCheck size={24} className="text-white" /></div>
+               <span className="text-sm font-black tracking-widest text-purple-600 uppercase">Hospital Admin</span>
             </div>
-           <div className="flex gap-2">
-             <button onClick={() => window.location.href = '/'} className="flex items-center gap-2 px-5 py-2.5 bg-slate-100 border border-slate-200 text-slate-700 font-bold rounded-xl shadow-sm hover:shadow hover:bg-white transition-all shrink-0">
-                <Home size={18} className="text-purple-500" /> Visit Homepage
-             </button>
-             <button onClick={() => setShowProfile(true)} className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl shadow-sm hover:shadow hover:bg-slate-50 transition-all shrink-0">
-               <User size={18} className="text-purple-500" /> My Profile
-             </button>
-             <button onClick={() => { logout(); window.location.href = '/login'; }} className="flex items-center gap-2 px-5 py-2.5 bg-rose-50 border border-rose-100 text-rose-600 font-bold rounded-xl shadow-sm hover:shadow hover:bg-rose-100 transition-all shrink-0">
-                <LogOut size={18} /> Logout
-             </button>
-           </div>
+            <h1 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">Receptionist <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">Desk</span></h1>
+            <p className="text-slate-500 text-lg mt-2 font-medium">Monitoring {user?.name}'s desk operations.</p>
           </div>
-          
-          <div className="flex items-center justify-between mb-4 mt-8">
-            <div>
-              <h1 className="text-xl font-bold text-slate-800">Hospital Overview</h1>
-            </div>
-            <button 
-              onClick={() => setShowPrediction(true)}
-              className="flex items-center gap-2 bg-pink-50 text-pink-600 hover:bg-pink-100 px-4 py-2 rounded-xl transition-colors font-bold text-sm border border-pink-200 shadow-sm"
-            >
-              <TrendingUp size={16} /> Volume Analytics
-            </button>
-          </div>
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="p-6 rounded-2xl bg-purple-50 border border-purple-100 flex flex-col justify-center">
-                  <h3 className="font-bold text-purple-800">New Registrations</h3>
-                  <p className="text-3xl font-black text-purple-600 mt-2">24</p>
-              </div>
-              <div className="p-6 rounded-2xl bg-fuchsia-50 border border-fuchsia-100 flex flex-col justify-center">
-                  <h3 className="font-bold text-fuchsia-800">Bed Occupancy</h3>
-                  <p className="text-3xl font-black text-fuchsia-600 mt-2">85%</p>
-              </div>
-              <div className="p-6 rounded-2xl bg-pink-50 border border-pink-100 flex flex-col justify-center">
-                  <h3 className="font-bold text-pink-800">Pending Bills</h3>
-                  <p className="text-3xl font-black text-pink-600 mt-2">12</p>
-              </div>
-          </div>
-
-          <div className="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div>
-              <h2 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2"><Clock size={20} className="text-purple-600"/> Recent Appointments</h2>
-              {loading ? (
-                <p className="text-slate-500 animate-pulse">Loading appointments...</p>
-              ) : appointments.length > 0 ? (
-                <div className="overflow-hidden rounded-2xl border border-slate-200 shadow-sm overflow-x-auto">
-                  <table className="w-full text-left border-collapse min-w-[500px]">
-                    <thead>
-                      <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 text-sm">
-                        <th className="p-4 font-semibold">Patient</th>
-                        <th className="p-4 font-semibold">Doctor Assigned</th>
-                        <th className="p-4 font-semibold">No-Show Risk (ML)</th>
-                        <th className="p-4 font-semibold">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {appointments.map(apt => (
-                        <tr key={apt._id} className="hover:bg-slate-50 transition-colors">
-                          <td className="p-4">
-                            <button 
-                               onClick={() => {
-                                  const pat = patientsMap[apt.patientId] || { name: apt.patientName, age: 'N/A', gender: 'N/A', contact: apt.patientContact, medicalHistory: 'Not found' };
-                                  setSelectedEntity({ data: pat, type: 'patient' });
-                               }}
-                               className="text-left group hover:opacity-80"
-                            >
-                               <span className="font-bold text-slate-800 group-hover:text-purple-600 transition-colors underline decoration-purple-200 underline-offset-4">{apt.patientName}</span>
-                               <span className="block text-xs text-slate-500 mt-1 flex items-center gap-1"><Calendar size={12} /> {new Date(apt.appointmentDate).toLocaleDateString()}</span>
-                            </button>
-                          </td>
-                          <td className="p-4">
-                            <button 
-                               onClick={() => {
-                                  if (apt.doctorId) {
-                                      setSelectedEntity({ data: apt.doctorId, type: 'doctor' });
-                                  }
-                               }}
-                               className="text-left group hover:opacity-80"
-                            >
-                               <span className="font-semibold text-indigo-900 group-hover:text-fuchsia-600 transition-colors underline decoration-fuchsia-200 underline-offset-4">{apt.doctorId?.name || 'Unknown'}</span>
-                               <span className="block text-xs text-indigo-600 mt-1">{apt.department}</span>
-                            </button>
-                          </td>
-                          <td className="p-4">
-                             <span className={`px-2 py-1 text-xs font-bold rounded-lg flex items-center justify-center gap-1 w-max border ${
-                                apt.noShowRisk === 'High' ? 'bg-rose-50 text-rose-700 border-rose-200 shadow-sm shadow-rose-100' :
-                                apt.noShowRisk === 'Medium' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                                'bg-emerald-50 text-emerald-700 border-emerald-200'
-                              }`}>
-                                {apt.noShowRisk === 'High' && <AlertTriangle size={12} />}
-                                {apt.noShowRisk}
-                             </span>
-                          </td>
-                          <td className="p-4">
-                            <span className={`px-2 py-1 text-[10px] font-bold rounded-full flex items-center gap-1 w-max ${
-                              apt.status === 'SCHEDULED' ? 'bg-blue-100 text-blue-700' :
-                              apt.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-700' :
-                              'bg-slate-100 text-slate-600'
-                            }`}>
-                              {apt.status}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <div className="p-8 text-center bg-slate-50 rounded-2xl border border-slate-200">
-                  <p className="text-slate-500">No appointments found.</p>
-                </div>
-              )}
-            </div>
-
-            <div>
-              <h2 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2"><User size={20} className="text-indigo-600"/> Doctor Availability</h2>
-              {loading ? (
-                <p className="text-slate-500 animate-pulse">Loading doctors...</p>
-              ) : doctors.length > 0 ? (
-                <div className="overflow-hidden rounded-2xl border border-slate-200 shadow-sm overflow-y-auto max-h-[400px]">
-                  <table className="w-full text-left border-collapse min-w-[400px]">
-                    <thead className="sticky top-0 bg-white z-10">
-                      <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 text-sm">
-                        <th className="p-4 font-semibold">Doctor</th>
-                        <th className="p-4 font-semibold">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {doctors.map(doc => (
-                        <tr key={doc._id} className="hover:bg-slate-50 transition-colors cursor-pointer" onClick={() => setSelectedEntity({ data: doc, type: 'doctor' })}>
-                          <td className="p-4">
-                            <div className="flex items-center gap-3">
-                              <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${doc.color || 'from-indigo-500 to-purple-600'} flex items-center justify-center text-white font-bold text-xs overflow-hidden border border-white/20 shadow-sm`}>
-                                {(doc.avatar && (doc.avatar.startsWith('http') || doc.avatar.startsWith('data:'))) ? (
-                                  <img src={doc.avatar} alt={doc.name} className="w-full h-full object-cover" />
-                                ) : (
-                                  <span>{doc.avatar || doc.name.charAt(0)}</span>
-                                )}
-                              </div>
-                              <div>
-                                <p className="font-bold text-slate-800 text-sm hover:text-indigo-600 underline decoration-indigo-200 underline-offset-2">{doc.name}</p>
-                                <p className="text-xs text-slate-500">{doc.department}</p>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="p-4">
-                            <div className="flex flex-col gap-1 text-sm">
-                              {doc.isAvailable ? (
-                                <span className="text-emerald-600 font-bold flex items-center gap-1"><CheckCircle2 size={14} /> Available</span>
-                              ) : (
-                                <>
-                                  <span className="text-rose-500 font-bold flex items-center gap-1"><XCircle size={14} /> Unavailable</span>
-                                  {doc.unavailabilityReason && <span className="text-xs text-rose-400 max-w-[150px] truncate" title={doc.unavailabilityReason}>Reason: {doc.unavailabilityReason}</span>}
-                                </>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <div className="p-8 text-center bg-slate-50 rounded-2xl border border-slate-200">
-                  <p className="text-slate-500">No doctors found.</p>
-                </div>
-              )}
-            </div>
-            
-            {/* Added: Length of Stay ML Estimator */}
-            <div className="lg:col-span-2 mt-2">
-              <h2 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
-                <BedDouble size={20} className="text-fuchsia-600"/> 
-                Admitted Patients & Length of Stay (LoS) Predictor
-              </h2>
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-                <p className="text-sm text-slate-500 mb-6 font-medium">
-                  This estimator uses a regression model to predict the total length of hospital stay based on patient age, baseline condition severity, and historical recovery data.
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {mockAdmittedPatients.map(patient => {
-                    const los = calculateLoSPrediction(patient);
-                    return (
-                      <div key={patient.id} className="p-4 border border-slate-100 bg-slate-50 rounded-xl hover:shadow-md transition-shadow">
-                        <div className="flex justify-between items-start mb-3">
-                          <div>
-                            <h4 className="font-bold text-slate-800 flex items-center gap-2">
-                               {patient.name} <span className="text-xs font-normal text-slate-500">({patient.age}y)</span>
-                            </h4>
-                            <p className="text-xs font-semibold text-slate-500 mt-1">{patient.condition}</p>
-                          </div>
-                          <span className={`text-xs font-bold px-2 py-1 rounded-md ${los.daysRemaining <= 1 ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}`}>
-                             {los.daysRemaining === 0 ? 'Discharging Today' : `${los.daysRemaining} days left`}
-                          </span>
-                        </div>
-                        
-                        <div className="space-y-1">
-                          <div className="flex justify-between text-xs font-bold text-slate-600">
-                             <span>Admitted: {patient.admittedDate.toLocaleDateString(undefined, {month: 'short', day: 'numeric'})}</span>
-                             <span>Est. Discharge: {los.dischargeDate.toLocaleDateString(undefined, {month: 'short', day: 'numeric'})}</span>
-                          </div>
-                          <div className="w-full bg-slate-200 rounded-full h-2">
-                            <div 
-                               className={`h-2 rounded-full ${los.progressPercent > 80 ? 'bg-emerald-500' : 'bg-fuchsia-500'}`} 
-                               style={{ width: `${los.progressPercent}%` }}
-                            />
-                          </div>
-                          <div className="flex justify-between text-[10px] text-slate-400 mt-1 uppercase font-bold tracking-wider">
-                            <span>Predicted Stay: {los.predictedStay} Days</span>
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            </div>
-
-            {/* Added: Inventory Forecasting Chart */}
-            <div className="lg:col-span-2 mt-2">
-              <h2 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
-                <Activity size={20} className="text-emerald-600"/> 
-                Medical Supply Demand Forecast (ML)
-              </h2>
-              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                 <p className="text-sm text-slate-500 mb-6 font-medium">
-                  Polynomial regression model trained on the past 14 days of usage to predict the required volume of critical supplies (like Saline IVs and Masks) for the next 7 days.
-                 </p>
-                 <div className="h-[250px] w-full mt-4">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart
-                      data={inventoryData}
-                      margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                    >
-                      <defs>
-                        <linearGradient id="colorHist" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#94A3B8" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#94A3B8" stopOpacity={0}/>
-                        </linearGradient>
-                        <linearGradient id="colorFore" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                      <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{fill: '#64748B', fontSize: 11}} dy={10} />
-                      <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748B', fontSize: 11}} dx={-10} domain={['auto', 'auto']} />
-                      <RechartsTooltip 
-                        contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}}
-                      />
-                      <Area type="monotone" name="Past Demand" dataKey="historical" stroke="#94A3B8" strokeWidth={3} fillOpacity={1} fill="url(#colorHist)" />
-                      <Area type="monotone" name="Predicted Demand" dataKey="forecast" stroke="#10B981" strokeWidth={3} strokeDasharray="5 5" fillOpacity={1} fill="url(#colorFore)" />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            </div>
-
+          <div className="flex flex-wrap gap-3">
+            <button onClick={() => window.location.href = '/'} className="px-6 py-3 bg-white border border-slate-200 text-slate-700 font-bold rounded-2xl shadow-sm hover:shadow-md transition-all flex items-center gap-2"><Home size={18} className="text-purple-500" /> Home</button>
+            <button onClick={() => setShowProfile(true)} className="px-6 py-3 bg-white border border-slate-200 text-slate-700 font-bold rounded-2xl shadow-sm hover:shadow-md transition-all flex items-center gap-2"><User size={18} className="text-pink-500" /> Profile</button>
+            <button onClick={() => { logout(); window.location.href = '/login'; }} className="px-6 py-3 bg-rose-50 border border-rose-100 text-rose-600 font-bold rounded-2xl shadow-sm hover:shadow-md transition-all flex items-center gap-2"><LogOut size={18} /> Logout</button>
           </div>
         </motion.div>
+
+        <div className="max-w-7xl mx-auto space-y-8 relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+             {[
+               { label: 'New Registrations', value: stats.newRegistrations, color: 'from-purple-500 to-indigo-600', icon: Users },
+               { label: 'Bed Occupancy', value: stats.bedOccupancy, color: 'from-fuchsia-500 to-pink-600', icon: Hospital },
+               { label: 'Pending Bills', value: stats.pendingBills, color: 'from-rose-500 to-pink-500', icon: CreditCard }
+             ].map((stat, i) => (
+                <div key={i} className={`relative overflow-hidden p-6 rounded-3xl bg-gradient-to-br ${stat.color} text-white shadow-xl`}>
+                   <p className="text-xs font-black uppercase tracking-widest text-white/70 mb-2">{stat.label}</p>
+                   <p className="text-4xl font-black">{stat.value}</p>
+                   <stat.icon size={80} className="absolute -right-4 -bottom-4 text-white/10" />
+                </div>
+             ))}
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="lg:col-span-8 space-y-8">
+               <div className="p-8 bg-white rounded-[2.5rem] border border-slate-200 shadow-xl shadow-slate-200/50">
+                  <div className="flex items-center justify-between mb-8 text-slate-900">
+                     <h2 className="text-2xl font-black tracking-tight">Today's Appointment Queue</h2>
+                     <button onClick={() => setShowPrediction(true)} className="p-3 bg-purple-50 text-purple-600 rounded-2xl hover:bg-purple-100"><TrendingUp size={20} /></button>
+                  </div>
+                  {loading ? <div className="py-20 flex justify-center"><div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" /></div> : (
+                     <div className="overflow-x-auto">
+                        <table className="w-full border-separate border-spacing-y-4">
+                           <thead><tr className="text-left text-[10px] font-black text-slate-400 uppercase tracking-widest px-4"><th>PATIENT</th><th>DOCTOR AGENT</th><th>NO-SHOW RISK</th><th>STATUS</th></tr></thead>
+                           <tbody>
+                              {appointments.map(apt => (
+                                 <tr key={apt._id} className="group">
+                                    <td className="bg-slate-50/50 group-hover:bg-purple-50 border-y border-l border-slate-100 p-4 rounded-l-2xl">
+                                       <button onClick={() => setSelectedEntity({ data: patientsMap[apt.patientId] || { name: apt.patientName }, type: 'patient' })} className="flex items-center gap-3"><div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center font-black text-purple-600 border">{apt.patientName.charAt(0)}</div><p className="font-black text-slate-800">{apt.patientName}</p></button>
+                                    </td>
+                                    <td className="bg-slate-50/50 p-4"><span className="block text-sm font-bold text-slate-700">{apt.doctorId?.name || 'Assigned'}</span><span className="block text-[10px] font-black uppercase text-slate-400">{apt.department}</span></td>
+                                    <td className="bg-slate-50/50 p-4"><span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase ${apt.noShowRisk === 'High' ? 'bg-rose-50 text-rose-700' : 'bg-emerald-50 text-emerald-700'}`}>{apt.noShowRisk} RISK</span></td>
+                                    <td className="bg-slate-50/50 border-y border-r p-4 rounded-r-2xl"><div className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase ${apt.status === 'SCHEDULED' ? 'bg-purple-600 text-white' : 'bg-emerald-500 text-white'}`}>{apt.status}</div></td>
+                                 </tr>
+                              ))}
+                           </tbody>
+                        </table>
+                     </div>
+                  )}
+               </div>
+
+               <div className="p-8 bg-white rounded-[2.5rem] border border-slate-200 shadow-xl">
+                  <div className="flex items-center gap-3 mb-8"><Activity size={20} className="text-indigo-600" /><h2 className="text-2xl font-black tracking-tight">Demand Forecast (Linear Regression)</h2></div>
+                  <div className="h-64 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={inventoryData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                        <defs><linearGradient id="colorFore" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#A855F7" stopOpacity={0.3}/><stop offset="95%" stopColor="#A855F7" stopOpacity={0}/></linearGradient></defs>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" /><XAxis dataKey="date" axisLine={false} tickLine={false} tick={{fill: '#64748B', fontSize: 11}} /><YAxis axisLine={false} tickLine={false} tick={{fill: '#64748B', fontSize: 11}} /><RechartsTooltip contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} />
+                        <Area type="monotone" name="Historical" dataKey="historical" stroke="#94A3B8" strokeWidth={3} fillOpacity={0} /><Area type="monotone" name="Projected" dataKey="forecast" stroke="#A855F7" strokeWidth={3} fillOpacity={1} fill="url(#colorFore)" />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+               </div>
+            </div>
+
+            <div className="lg:col-span-4 space-y-8">
+               <div className="p-8 bg-white rounded-[2.5rem] border border-slate-200 shadow-xl">
+                  <h3 className="text-xl font-black mb-6 tracking-tight">Active Specialists</h3>
+                  <div className="space-y-4">
+                     {doctors.slice(0, 5).map(doc => (
+                        <div key={doc._id} onClick={() => setSelectedEntity({ data: doc, type: 'doctor' })} className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-purple-200 cursor-pointer transition-all">
+                           <div className="flex items-center gap-3"><div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center font-black text-purple-600 overflow-hidden">{(doc.avatar && doc.avatar.startsWith('http')) ? <img src={doc.avatar} className="w-full h-full object-cover" /> : doc.name.charAt(0)}</div><p className="text-sm font-black text-slate-800">{doc.name}</p></div>
+                           <div className={`w-2 h-2 rounded-full ${doc.isAvailable ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                        </div>
+                     ))}
+                  </div>
+               </div>
+
+               <div className="p-8 bg-slate-900 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden group">
+                  <div className="relative z-10">
+                     <h3 className="text-xl font-black mb-4 tracking-tight">Live Supply Index</h3>
+                     <div className="space-y-6">
+                        {[
+                           { label: 'Oxygen Reserves', val: '94%', color: 'from-cyan-400 to-blue-500' },
+                           { label: 'CCU Beds', val: '12 Free', color: 'from-emerald-400 to-teal-500' },
+                           { label: 'Blood Supply', val: 'Optimal', color: 'from-rose-400 to-pink-500' }
+                        ].map((item, i) => (
+                           <div key={i}><div className="flex justify-between text-[10px] font-black uppercase tracking-widest mb-2"><span className="text-white/40">{item.label}</span><span>{item.val}</span></div><div className="h-1 w-full bg-white/10 rounded-full overflow-hidden"><div className={`h-full bg-gradient-to-r ${item.color} rounded-full`} style={{ width: item.val.includes('%') ? item.val : '70%' }} /></div></div>
+                        ))}
+                     </div>
+                  </div>
+               </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   };

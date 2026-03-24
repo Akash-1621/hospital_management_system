@@ -16,6 +16,12 @@ const users = [
     role: 'Patient',
   },
   {
+    name: 'Akash Prasad M',
+    email: 'akash@gmail.com',
+    password: '1qaz7ujm',
+    role: 'Doctor',
+  },
+  {
     name: 'Anita Desai',
     email: 'receptionist@care.com',
     password: 'password123',

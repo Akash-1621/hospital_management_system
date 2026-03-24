@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
+import { AuthContext } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   BedDouble, Stethoscope, FileText, Upload, ArrowLeft, Activity,
@@ -236,20 +237,53 @@ const DoctorAvailability = () => {
 // ============ BOOK ADMISSION TAB ============
 
 const BookAdmission = () => {
+  const { user } = useContext(AuthContext);
   const [form, setForm] = useState({
-    name: '', age: '', gender: 'MALE', contact: '', email: '',
+    name: user?.name || '', 
+    age: user?.age || '', 
+    gender: user?.gender || 'MALE', 
+    contact: user?.phone || user?.contact || '', 
+    email: user?.email || '',
     department: 'Cardiology', reason: '', bedType: 'AC Private Room',
     preferredDoctor: '', emergencyContact: '',
   });
+
+  useEffect(() => {
+    if (user) {
+      setForm(prev => ({
+        ...prev,
+        name: user.name || prev.name,
+        email: user.email || prev.email,
+        contact: user.phone || user.contact || prev.contact,
+        age: user.age || prev.age,
+        gender: user.gender || prev.gender
+      }));
+    }
+  }, [user]);
   const [file, setFile] = useState(null);
   const [submitted, setSubmitted] = useState(false);
 
   const handleChange = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 5000);
+    try {
+      const response = await fetch('http://localhost:5000/api/patients', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      const data = await response.json();
+      if (data.success) {
+        setSubmitted(true);
+        setTimeout(() => setSubmitted(false), 8000);
+      } else {
+        alert(data.message || 'Failed to submit admission request');
+      }
+    } catch (err) {
+      console.error('Submission error:', err);
+      alert('Network error. Is the backend running?');
+    }
   };
 
   if (submitted) {

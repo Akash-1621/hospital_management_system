@@ -31,12 +31,12 @@ const receptionists = [
     color: 'from-purple-500 to-violet-600',
   },
   {
-    name: 'Riya Joseph',
+    name: 'Charanjith',
     desk: 'Lab & Diagnostics Counter',
     shift: 'Morning (8 AM – 4 PM)',
     languages: 'English, Hindi, Kannada',
     contact: '+91 96543 21003',
-    avatar: 'RJ',
+    avatar: 'CJ',
     color: 'from-orange-500 to-red-600',
   },
 ];

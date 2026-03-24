@@ -91,7 +91,6 @@ const Footer = () => {
               {[
                 { label: 'Doctors', href: '#doctors' },
                 { label: 'Patients', href: '#patients' },
-                { label: 'Nurses', href: '#nurses' },
                 { label: 'Reports', href: '#reports' },
                 { label: 'Details', href: '#details' },
               ].map((item) => (

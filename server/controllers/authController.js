@@ -13,10 +13,13 @@ const generateToken = (id) => {
 // @access  Public
 const registerUser = async (req, res) => {
   try {
-    const { name, email, password, role, dob, age, representative } = req.body;
+    const { name, email, password, role, dob, age, representative, phone, photo } = req.body;
 
     // Check if user exists
-    const userExists = await User.findOne({ email });
+    // Check if user exists (case-insensitive)
+    const userExists = await User.findOne({ 
+      email: { $regex: new RegExp(`^${email.trim()}$`, 'i') } 
+    });
 
     if (userExists) {
       return res.status(400).json({ success: false, message: 'User already exists' });
@@ -28,6 +31,8 @@ const registerUser = async (req, res) => {
       email,
       password,
       role: role || 'Patient',
+      phone: phone || '',
+      photo: photo || ''
     });
 
     if (user) {
@@ -37,11 +42,11 @@ const registerUser = async (req, res) => {
         await Doctor.create({
           name: user.name,
           email: user.email,
-          department: 'General Medicine', // Default
-          specialization: 'General Physician', // Default
-          experience: '5 Years',
-          contact: 'Not Specified',
-          avatar: '',
+          department: req.body.department || 'General Medicine',
+          specialization: req.body.specialization || 'General Physician',
+          experience: req.body.experience || '5 Years',
+          contact: req.body.phone || req.body.contact || 'Not Specified',
+          avatar: req.body.photo || '',
         });
       } else if (user.role === 'Patient') {
         const Patient = require('../models/Patient');
@@ -51,10 +56,11 @@ const registerUser = async (req, res) => {
           age: age || 30,
           dob: dob || new Date(),
           representative: representative || { name: '', relation: 'NONE' },
-          gender: 'OTHER',
-          contact: 'Not Specified',
-          department: 'GENERAL',
-          status: 'UNDER_TREATMENT'
+          gender: req.body.gender || 'OTHER',
+          contact: req.body.phone || req.body.contact || 'Not Specified',
+          department: req.body.department || 'General Medicine',
+          status: req.body.status || 'UNDER_TREATMENT',
+          photo: req.body.photo || ''
         });
       }
 
@@ -65,6 +71,8 @@ const registerUser = async (req, res) => {
           name: user.name,
           email: user.email,
           role: user.role,
+          phone: user.phone,
+          photo: user.photo,
           token: generateToken(user._id),
         },
       });
@@ -84,7 +92,10 @@ const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     // Check for user email
-    const user = await User.findOne({ email }).select('+password');
+    // Use case-insensitive regex to match existing users regardless of case
+    const user = await User.findOne({ 
+      email: { $regex: new RegExp(`^${email.trim()}$`, 'i') } 
+    }).select('+password');
 
     if (!user) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
@@ -104,6 +115,9 @@ const loginUser = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        phone: user.phone,
+        photo: user.photo,
+        specialization: user.specialization,
         token: generateToken(user._id),
       },
     });

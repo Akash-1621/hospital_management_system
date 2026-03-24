@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Heart, Mail, Lock, Loader2, ArrowLeft, User, Stethoscope, Users, Contact, Calendar, Hash } from 'lucide-react';
+import { Heart, Mail, Lock, Loader2, ArrowLeft, User, Stethoscope, Users, Contact, Calendar, Hash, Phone, Camera } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 
 const Login = () => {
@@ -12,6 +12,8 @@ const Login = () => {
   const [role, setRole] = useState('Patient');
   const [age, setAge] = useState('');
   const [dob, setDob] = useState('');
+  const [phone, setPhone] = useState('');
+  const [photo, setPhoto] = useState('');
   const [repName, setRepName] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -57,6 +59,7 @@ const Login = () => {
       ? { email, password } 
       : { 
           name, email, password, role, 
+          phone, photo,
           age: role === 'Patient' ? parseInt(age) : undefined,
           dob: role === 'Patient' ? dob : undefined,
           representative: role === 'Patient' ? { name: repName, relation } : undefined
@@ -238,20 +241,59 @@ const Login = () => {
             )}
 
             {!isLoginModel && (
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2.5 ml-1">Select your role</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {roles.map((r) => (
-                    <button
-                      key={r.id}
-                      type="button"
-                      onClick={() => setRole(r.id)}
-                      className={`py-3.5 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${role === r.id ? 'bg-slate-900 border-slate-900 text-white shadow-lg' : 'bg-slate-50 border-slate-100 text-slate-500 hover:border-slate-300'}`}
-                    >
-                      <r.icon size={18} className={role === r.id ? 'text-cyan-400' : 'text-slate-400'} />
-                      <span className="text-[10px] font-black uppercase tracking-wider">{r.label}</span>
-                    </button>
-                  ))}
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+                <div>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1.5 ml-1">Phone Number</label>
+                  <div className="relative rounded-xl">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400"><Phone size={18} /></div>
+                    <input type="tel" required value={phone} onChange={(e) => setPhone(e.target.value)} className="block w-full pl-11 pr-4 py-3.5 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-cyan-500/10 focus:border-cyan-500 transition-all outline-none text-slate-900 font-bold text-sm" placeholder="10-digit number" />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 ml-1">Profile Photo</label>
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 rounded-2xl bg-slate-100 border border-slate-200 overflow-hidden shrink-0">
+                      {photo ? (
+                        <img src={photo} alt="Preview" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-slate-300">
+                          <User size={24} />
+                        </div>
+                      )}
+                    </div>
+                    <label className="flex-1 cursor-pointer">
+                      <div className="flex items-center justify-center gap-2 px-4 py-3 bg-white border-2 border-dashed border-slate-200 rounded-2xl hover:border-cyan-400 hover:bg-cyan-50 transition-all group">
+                        <Camera size={18} className="text-slate-400 group-hover:text-cyan-500" />
+                        <span className="text-xs font-bold text-slate-500 group-hover:text-cyan-600">Upload Photo</span>
+                      </div>
+                      <input type="file" className="hidden" accept="image/*" onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onloadend = () => setPhoto(reader.result);
+                          reader.readAsDataURL(file);
+                        }
+                      }} />
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2.5 ml-1">Select your role</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {roles.map((r) => (
+                      <button
+                        key={r.id}
+                        type="button"
+                        onClick={() => setRole(r.id)}
+                        className={`py-3.5 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${role === r.id ? 'bg-slate-900 border-slate-900 text-white shadow-lg' : 'bg-slate-50 border-slate-100 text-slate-500 hover:border-slate-300'}`}
+                      >
+                        <r.icon size={18} className={role === r.id ? 'text-cyan-400' : 'text-slate-400'} />
+                        <span className="text-[10px] font-black uppercase tracking-wider">{r.label}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </motion.div>
             )}

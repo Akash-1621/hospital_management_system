@@ -76,8 +76,12 @@ const Navbar = () => {
                <div className="flex items-center gap-6">
                   {/* Subtle Profile indicator */}
                   <div className="flex items-center gap-2 pr-2 border-r border-slate-200">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-white font-bold text-xs shadow-sm">
-                      {user.name.charAt(0)}
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-white font-bold text-xs shadow-sm overflow-hidden">
+                      {user.photo ? (
+                        <img src={user.photo} alt={user.name} className="w-full h-full object-cover" />
+                      ) : (
+                        user.name.charAt(0)
+                      )}
                     </div>
                     <span className="text-xs font-semibold text-slate-600 hidden lg:block">{user.name.split(' ')[0]}</span>
                   </div>

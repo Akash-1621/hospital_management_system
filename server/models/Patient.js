@@ -46,8 +46,8 @@ const patientSchema = new mongoose.Schema(
     },
     department: {
       type: String,
-      enum: ['CARDIOLOGY', 'NEUROLOGY', 'ORTHOPEDICS', 'PEDIATRICS', 'GENERAL'],
-      default: 'GENERAL',
+      enum: ['Cardiology', 'Neurology', 'Orthopedics', 'Pediatrics', 'General Medicine', 'ICU', 'Maternity', 'ENT'],
+      default: 'General Medicine',
     },
     medicalHistory: {
       type: String,
@@ -65,6 +65,10 @@ const patientSchema = new mongoose.Schema(
     assignedDoctor: {
       type: String,
       trim: true,
+    },
+    photo: {
+      type: String,
+      default: '',
     },
   },
   {

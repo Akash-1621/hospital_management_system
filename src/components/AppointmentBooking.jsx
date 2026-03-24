@@ -60,8 +60,12 @@ const DoctorCard = ({ doctor, onSelect, selected }) => (
     }`}
   >
     <div className="flex items-start gap-4">
-      <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${doctor.color} flex items-center justify-center shadow-lg shrink-0`}>
-        <span className="text-lg font-bold" style={{ color: 'white' }}>{doctor.avatar}</span>
+      <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${doctor.color} flex items-center justify-center shadow-lg shrink-0 overflow-hidden`}>
+        {(doctor.avatar && (doctor.avatar.startsWith('http') || doctor.avatar.startsWith('data:'))) ? (
+          <img src={doctor.avatar} alt={doctor.name} className="w-full h-full object-cover" />
+        ) : (
+          <span className="text-lg font-bold text-white">{doctor.name?.charAt(0) || '?'}</span>
+        )}
       </div>
       <div className="flex-1 min-w-0">
         <h3 className="font-bold text-slate-800 text-base">{doctor.name}</h3>

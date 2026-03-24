@@ -4,10 +4,24 @@ const Patient = require('../models/Patient');
 // @route   POST /api/patients
 const createPatient = async (req, res) => {
   try {
-    const patient = await Patient.create(req.body);
+    const { email } = req.body;
+    let patient;
+    
+    if (email) {
+      // If email provided, find and update or create (upsert)
+      patient = await Patient.findOneAndUpdate(
+        { email: email.toLowerCase() },
+        { $set: req.body },
+        { new: true, upsert: true, runValidators: true }
+      );
+    } else {
+      // Just create new if no email
+      patient = await Patient.create(req.body);
+    }
+
     res.status(201).json({
       success: true,
-      message: 'Patient created successfully',
+      message: email ? 'Patient record updated successfully' : 'Patient created successfully',
       data: patient,
     });
   } catch (error) {

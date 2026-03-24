@@ -22,10 +22,11 @@ const defaultPatient = {
   contact: '9876543210',
   email: 'rahul.sharma@email.com',
   address: '42 MG Road, Bangalore',
-  department: 'CARDIOLOGY',
+  department: 'Cardiology',
   medicalHistory: 'Hypertension, mild arrhythmia',
   status: 'ADMITTED',
   assignedDoctor: 'Dr. Priya Menon',
+  photo: '',
 };
 
 const ApiTester = ({ onBack }) => {
@@ -99,11 +100,11 @@ const ApiTester = ({ onBack }) => {
             ) : key === 'department' ? (
               <select value={value} onChange={e => setCreateForm({...createForm, [key]: e.target.value})}
                 className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400">
-                <option value="CARDIOLOGY">CARDIOLOGY</option>
-                <option value="NEUROLOGY">NEUROLOGY</option>
-                <option value="ORTHOPEDICS">ORTHOPEDICS</option>
-                <option value="PEDIATRICS">PEDIATRICS</option>
-                <option value="GENERAL">GENERAL</option>
+                <option value="Cardiology">Cardiology</option>
+                <option value="Neurology">Neurology</option>
+                <option value="Orthopedics">Orthopedics</option>
+                <option value="Pediatrics">Pediatrics</option>
+                <option value="General Medicine">General Medicine</option>
               </select>
             ) : key === 'status' ? (
               <select value={value} onChange={e => setCreateForm({...createForm, [key]: e.target.value})}
@@ -142,11 +143,11 @@ const ApiTester = ({ onBack }) => {
           <select value={filters.department} onChange={e => setFilters({...filters, department: e.target.value})}
             className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400">
             <option value="">All Departments</option>
-            <option value="CARDIOLOGY">CARDIOLOGY</option>
-            <option value="NEUROLOGY">NEUROLOGY</option>
-            <option value="ORTHOPEDICS">ORTHOPEDICS</option>
-            <option value="PEDIATRICS">PEDIATRICS</option>
-            <option value="GENERAL">GENERAL</option>
+            <option value="Cardiology">Cardiology</option>
+            <option value="Neurology">Neurology</option>
+            <option value="Orthopedics">Orthopedics</option>
+            <option value="Pediatrics">Pediatrics</option>
+            <option value="General Medicine">General Medicine</option>
           </select>
         </div>
         <div>
@@ -228,11 +229,11 @@ const ApiTester = ({ onBack }) => {
           <select value={updateForm.department || ''} onChange={e => setUpdateForm({...updateForm, department: e.target.value})}
             className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-400">
             <option value="">No Change</option>
-            <option value="CARDIOLOGY">CARDIOLOGY</option>
-            <option value="NEUROLOGY">NEUROLOGY</option>
-            <option value="ORTHOPEDICS">ORTHOPEDICS</option>
-            <option value="PEDIATRICS">PEDIATRICS</option>
-            <option value="GENERAL">GENERAL</option>
+            <option value="Cardiology">Cardiology</option>
+            <option value="Neurology">Neurology</option>
+            <option value="Orthopedics">Orthopedics</option>
+            <option value="Pediatrics">Pediatrics</option>
+            <option value="General Medicine">General Medicine</option>
           </select>
         </div>
         <div>

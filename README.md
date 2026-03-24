@@ -1,38 +1,45 @@
+---
+
+**Student Name**: Akash Prasad M  
+**Roll No**: CB.SC.U4CSE23703  
+**Project**: CareSphere - Modern Hospital Management System
+
+---
+
 # CareSphere - Hospital Management System
 
 CareSphere is a modern, full-stack Hospital Management System (HMS) built using the **MERN Stack**. It provides a comprehensive solution for managing patient records, appointments, and hospital workflows with a focus on ease of use and predictive analytics.
 
-![CareSphere Logo](screenshots/hero.png)
+## 🚀 Key Features
 
-## 🚀 Features
-
-- **Multi-Role Dashboards**: Specialized interfaces for Doctors, Patients, and Receptionists.
-- **Patient Management**: Full CRUD operations for patient records with advanced filtering and pagination.
-- **Appointment Scheduling**: Streamlined booking system for patients and doctors.
-- **AI Chatbot**: Intelligent medical assistant to help patients with common queries.
-- **Predictive Analytics**: ML-powered patient admission trends and data visualization using Recharts.
-- **Role-Based Access Control**: Secure authentication and authorization using JWT and Bcrypt.
-- **Modern UI/UX**: Responsive design built with React, Tailwind CSS, and Framer Motion for smooth animations.
-- **API Tester**: Built-in interface for testing backend endpoints directly from the frontend.
+*   **Multi-Role Dashboards**: Specialized premium interfaces for **Doctors, Patients, and Receptionists**.
+*   **Patient Management**: Full CRUD operations for patient records with advanced filtering.
+*   **Appointment Lifecycle**: Integrated scheduling system with status tracking.
+*   **AI Chatbot Assistant**: Intelligent symptom triage and FAQ assistant for patients.
+*   **Predictive Analytics (ML)**: 
+    *   **Patient Volume Forecasting**: Linear regression model for predicting admission trends.
+    *   **Medical Supply Forecast**: Real-time monitoring and demand prediction for hospital inventory.
+    *   **No-Show Risk Analysis**: Data-driven risk assessment for scheduled appointments.
+*   **Modern UI/UX**: Responsive design built with **React**, **Tailwind CSS**, and **Framer Motion** for a premium "Glassmorphism" aesthetic.
 
 ## 🛠️ Technology Stack
 
-| Layer | Technology |
-|-------|------------|
+| Component | Technology |
+| :--- | :--- |
 | **Frontend** | React 18, Vite, Tailwind CSS, Framer Motion, Lucide React, Recharts |
 | **Backend** | Node.js, Express.js |
-| **Database** | MongoDB with Mongoose ODM |
-| **Authentication** | JSON Web Tokens (JWT), Bcrypt.js |
-| **ML/Analytics** | Regression.js for trend prediction |
+| **Database** | MongoDB with Mongoose ODM (Atlas Cloud Integration) |
+| **Security** | JWT Authentication, Bcrypt Password Hashing, CORS Protection |
+| **Analytics** | Regression.js + Custom ML Heuristics |
 
-## 📁 Project Structure
+## 📁 Project Architecture
 
 ```text
 mern-hospital-management/
-├── server/                 # Backend (Node.js/Express)
-│   ├── config/             # DB connection configuration
-│   ├── controllers/        # Route controllers (CRUD logic)
-│   ├── models/             # Mongoose schemas (User, Patient, Appointment)
+├── server/                 # Backend Core (Express.js)
+│   ├── config/             # Connection & Environment Setup
+│   ├── controllers/        # Business Logic & CRUD Handlers
+│   ├── models/             # Mongoose Schemas (User, Patient, Doctor, Appointment)
 │   ├── routes/             # API endpoints
 │   └── server.js           # Entry point (Port 5000)
 ├── src/                    # Frontend (React + Vite)
@@ -42,90 +49,44 @@ mern-hospital-management/
 │   ├── App.jsx             # Main routing logic
 │   └── main.jsx            # React entry point
 ├── public/                 # Static assets
-├── screenshots/            # Project documentation images
 ├── tailwind.config.js      # CSS configuration
 └── vite.config.js          # Build tool configuration
 ```
 
-## 📡 API Endpoints
+## 📡 Essential API Reference
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/auth/register` | User registration |
-| `POST` | `/api/auth/login` | User login (JWT) |
-| `GET` | `/api/patients` | Fetch all patient records |
-| `POST` | `/api/patients` | Create a new patient record |
-| `PUT` | `/api/patients/:id` | Update patient details |
-| `DELETE` | `/api/patients/:id` | Remove patient record |
-| `GET` | `/api/appointments`| Fetch scheduled appointments |
-| `POST` | `/api/chatbot/chat`| Interact with the AI assistant |
+| Method | Endpoint | Purpose |
+| :--- | :--- | :--- |
+| `POST` | `/api/auth/login` | Secure JWT-based Authentication |
+| `PUT` | `/api/auth/profile/:email` | Dynamic Profile Management (Case-Insensitive) |
+| `GET` | `/api/patients` | Comprehensive Patient Directory Access |
+| `GET` | `/api/doctors` | Real-time Specialist Availability |
+| `GET` | `/api/forecast` | ML-driven Inventory Demand Prediction |
+| `GET` | `/api/stats` | Live Hospital Capacity & Billing Metrics |
 
-## 🚦 Getting Started
+## 🚦 Setup Instructions
 
-### Prerequisites
+### 1. Database Configuration
+Ensure you have a MongoDB instance running. Configure the `MONGO_URI` in the `.env` file within the `server` directory.
 
-- **Node.js**: v18 or later
-- **MongoDB**: Local instance or MongoDB Atlas URI
-- **npm** or **yarn**
+### 2. Backend Initialization
+```bash
+cd server
+npm install
+npm start
+```
 
-### Installation
+### 3. Frontend Initialization
+```bash
+# In a new terminal from the root folder
+npm install
+npm run dev
+```
 
-1. **Clone the repository**:
-   ```bash
-   git clone <repository-url>
-   cd mern-hospital-management
-   ```
-
-2. **Frontend Setup**:
-   ```bash
-   npm install
-   ```
-
-3. **Backend Setup**:
-   ```bash
-   cd server
-   npm install
-   ```
-
-4. **Environment Variables**:
-   Create a `.env` file in the `server` directory:
-   ```env
-   PORT=5000
-   MONGODB_URI=mongodb://localhost:27017/caresphere
-   JWT_SECRET=your_super_secret_key
-   ```
-
-### Running the Application
-
-1. **Start the Backend**:
-   ```bash
-   cd server
-   npm run dev
-   ```
-
-2. **Start the Frontend**:
-   ```bash
-   # In a new terminal from the root
-   npm run dev
-   ```
-
-3. **Access the App**:
-   Open `http://localhost:5173` in your browser.
-
-## 🧪 Testing the API
-
-The application includes a built-in **API Tester**. You can access it by clicking the 🧪 icon in the navigation bar or floating button to test all CRUD operations without external tools like Postman.
-
-## 📸 Screenshots
-
-| Landing Page | Dashboard |
-|--------------|-----------|
-| ![Home](screenshots/create.png) | ![Dashboard](screenshots/get_all.png) |
-
-## 📜 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
+### 4. Default Port Access
+*   **Backend**: `http://localhost:5000`
+*   **Frontend**: `http://localhost:5173`
 
 ---
 
-**Developed by Akash Prasad M (CB.SC.U4CSE23703)**
+**Developed with ❤️ by Akash Prasad M (CB.SC.U4CSE23703)**

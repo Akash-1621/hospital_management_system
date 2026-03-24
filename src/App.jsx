@@ -4,14 +4,14 @@ import { motion, useScroll, useSpring } from 'framer-motion';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import DoctorsSection from './components/DoctorsSection';
-import PatientsSection from './components/PatientsSection';
-import NursesSection from './components/NursesSection';
+import ProjectOverview from './components/ProjectOverview';
 import ReceptionistsSection from './components/ReceptionistsSection';
 import ReportsSection from './components/ReportsSection';
 import DetailsSection from './components/DetailsSection';
 import AboutSection from './components/AboutSection';
 import TeamSection from './components/TeamSection';
 import ContactSection from './components/ContactSection';
+import SystemArchitecture from './components/SystemArchitecture';
 import HelpSection from './components/HelpSection';
 import Footer from './components/Footer';
 import ApiTester from './components/ApiTester';
@@ -38,8 +38,6 @@ function Home() {
       />
       <Hero />
       <DoctorsSection />
-      <PatientsSection />
-      <NursesSection />
       <ReceptionistsSection />
       <ReportsSection />
       <DetailsSection />
